@@ -1,0 +1,225 @@
+{% extends "layout.html" %}
+
+{% block title %}Yeni Araç Ekle | Yolingo{% endblock %}
+
+{% block body %}
+<style>
+    /* TEMA RENKLERİ */
+    :root {
+        --yolingo-dark: #0b1228;
+        --yolingo-orange: #f97316;
+        --yolingo-orange-dark: #ea580c;
+        --yolingo-gray: #f8fafc;
+    }
+
+    /* CARD TASARIMI */
+    .card-header-custom {
+        background: linear-gradient(90deg, #0b1228 0%, #1e3a8a 100%);
+        color: white;
+        border-bottom: 4px solid var(--yolingo-orange);
+    }
+
+    /* FORM ELEMANLARI */
+    .form-control:focus, .form-select:focus {
+        border-color: var(--yolingo-orange);
+        box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.25);
+    }
+    
+    .input-group-text {
+        border-color: #dee2e6;
+        background-color: #fff;
+        color: var(--yolingo-orange); /* İkon rengi */
+    }
+
+    /* BUTONLAR */
+    .btn-orange-gradient {
+        background: linear-gradient(45deg, var(--yolingo-orange), var(--yolingo-orange-dark));
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    .btn-orange-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(249, 115, 22, 0.4);
+        color: white;
+    }
+
+    .btn-outline-custom {
+        border: 2px solid rgba(255,255,255,0.2);
+        color: white;
+        transition: all 0.3s;
+    }
+    .btn-outline-custom:hover {
+        background-color: white;
+        color: var(--yolingo-dark);
+        border-color: white;
+    }
+
+    /* BÖLÜM BAŞLIKLARI */
+    .section-title {
+        color: var(--yolingo-dark);
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                
+                <div class="card-header card-header-custom p-4 d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0 fw-bold text-uppercase" style="letter-spacing: 1px; font-size: 1.2rem;">
+                        <i class="fas fa-plus-circle text-orange me-2" style="color: #f97316;"></i>Filoya Yeni Araç Ekle
+                    </h4>
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-custom btn-sm rounded-pill px-3 fw-bold">
+                        <i class="fas fa-arrow-left me-1"></i>Panele Dön
+                    </a>
+                </div>
+
+                <div class="card-body p-5 bg-white">
+                    
+                    <form action="{{ url_for('admin.arac_ekle') }}" method="POST" enctype="multipart/form-data">
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="section-title">
+                                    <i class="fas fa-car me-2 text-primary"></i>ARAÇ KİMLİK BİLGİLERİ
+                                </h6>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">Marka</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-car-side"></i></span>
+                                    <input type="text" name="marka" class="form-control" placeholder="Örn: BMW" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">Model</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-car"></i></span>
+                                    <input type="text" name="model" class="form-control" placeholder="Örn: 520i" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">Model Yılı</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                    <input type="number" name="yil" class="form-control" value="2025" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">Plaka</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                    <input type="text" name="plaka" class="form-control text-uppercase" placeholder="34 XX 000" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="section-title">
+                                    <i class="fas fa-cogs me-2 text-primary"></i>TEKNİK ÖZELLİKLER & KONUM
+                                </h6>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">Kategori</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-list"></i></span>
+                                    <select class="form-select" name="kategori_id" required>
+                                        {% for kat in kategoriler %}
+                                            <option value="{{ kat.kategori_id }}">{{ kat.kategori_ad }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label small fw-bold text-secondary">Bulunduğu Şehir</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-map-marker-alt text-danger"></i></span>
+                                    <select class="form-select" name="sehir_id" required>
+                                        {% for sehir in sehirler %}
+                                            <option value="{{ sehir.sehir_id }}">{{ sehir.sehir_ad }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label small fw-bold text-secondary">Yakıt</label>
+                                <select class="form-select" name="yakit_turu">
+                                    <option value="Benzin">Benzin</option>
+                                    <option value="Dizel">Dizel</option>
+                                    <option value="Hibrit">Hibrit</option>
+                                    <option value="Elektrik">Elektrik</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label small fw-bold text-secondary">Vites</label>
+                                <select class="form-select" name="vites_turu">
+                                    <option value="Otomatik">Otomatik</option>
+                                    <option value="Manuel">Manuel</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label small fw-bold text-success">Günlük Ücret (₺)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-success text-white fw-bold">₺</span>
+                                    <input type="number" step="0.01" class="form-control fw-bold text-success" name="gunluk_ucret" placeholder="0.00" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-4 bg-light rounded-4 border border-light mb-4 position-relative">
+                            <span class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-primary ms-4 mt-0 shadow-sm">
+                                <i class="fas fa-file-contract me-1"></i> Sigorta
+                            </span>
+                            
+                            <div class="row mt-2">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-secondary">Sigorta Şirketi</label>
+                                    <input type="text" name="sigorta_sirketi" class="form-control bg-white" placeholder="Örn: Allianz" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-secondary">Poliçe No</label>
+                                    <input type="text" name="police_no" class="form-control bg-white" placeholder="POL-123456" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-secondary">Başlangıç Tarihi</label>
+                                    <input type="date" name="sigorta_baslangic" class="form-control bg-white" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label small fw-bold text-secondary">Bitiş Tarihi</label>
+                                    <input type="date" name="sigorta_bitis" class="form-control bg-white" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-secondary">Araç Görseli Yükle</label>
+                            <input type="file" class="form-control" name="resim" accept="image/*">
+                            <div class="form-text text-muted"><i class="fas fa-info-circle me-1"></i>Şeffaf arka planlı (PNG) görsel önerilir.</div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-orange-gradient btn-lg py-3 fw-bold rounded-pill">
+                                <i class="fas fa-save me-2"></i> ARACI SİSTEME KAYDET
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

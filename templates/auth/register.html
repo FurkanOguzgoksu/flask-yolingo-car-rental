@@ -1,0 +1,321 @@
+{% extends "layout.html" %}
+{% block title %}Kayıt Ol - Yolingo{% endblock %}
+{% block body %}
+
+<style>
+:root{
+    /* Daha açık, yumuşak mavi tonlar */
+    --g900:#1d4ed8;   /* ana mavi */
+    --g800:#2563eb;   /* primary */
+    --g700:#3b82f6;   /* hover */
+    --g600:#60a5fa;   /* accent (açık mavi) */
+}
+
+/* Kart */
+.register-card{
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(59,130,246,.18);
+}
+
+/* Header: daha açık mavi degrade */
+.register-header{
+    background: linear-gradient(135deg, var(--g900), var(--g700));
+}
+
+/* Header icon */
+.register-header i{
+    color: #e0f2fe;
+}
+
+/* Inputlar */
+.register-card .form-control,
+.register-card .form-select, /* Select için stil eklendi */
+.register-card textarea{
+    background:#f8fafc;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 12px 14px;
+    transition:.2s ease;
+    color: #334155;
+}
+
+.register-card .input-group .form-control,
+.register-card .input-group .form-select {
+    border-radius: 0 12px 12px 0;
+}
+
+.register-card .input-group-text{
+    background:#f8fafc;
+    border: 1px solid transparent;
+    border-radius: 12px 0 0 12px;
+    padding: 0 14px;
+    color:#64748b;
+}
+
+/* Focus – MAVİ */
+.register-card .input-group:focus-within .input-group-text{
+    background:#fff;
+    border-color: rgba(37,99,235,.45);
+}
+.register-card .input-group:focus-within .input-group-text i{
+    color: var(--g800) !important;
+}
+.register-card .input-group:focus-within .form-control,
+.register-card .input-group:focus-within .form-select,
+.register-card .form-control:focus,
+.register-card .form-select:focus,
+.register-card textarea:focus{
+    background:#fff !important;
+    border-color: rgba(37,99,235,.45) !important;
+    box-shadow: 0 0 0 .20rem rgba(59,130,246,.25) !important;
+    outline:none !important;
+}
+
+/* Label */
+.register-card .form-label{
+    font-weight:800;
+    font-size:.78rem;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+    color:#64748b;
+}
+
+/* Bilgi metni */
+.register-card .form-text{
+    color:#64748b !important;
+}
+
+/* Şifre göz butonu */
+.pw-btn{
+    border-radius: 0 12px 12px 0 !important;
+    border: 1px solid transparent !important;
+    background:#f8fafc !important;
+    color:#334155 !important;
+    transition:.2s ease;
+}
+.register-card .input-group:focus-within .pw-btn{
+    background:#fff !important;
+    border-color: rgba(37,99,235,.45) !important;
+}
+
+/* Submit butonu – daha açık mavi */
+.btn-green{
+    background: linear-gradient(135deg, var(--g800), var(--g700));
+    border: none;
+    color:#fff;
+    font-weight:900;
+    letter-spacing: 1px;
+    border-radius: 14px;
+    padding: 12px 26px;
+    transition: .25s ease;
+}
+.btn-green:hover{
+    background: linear-gradient(135deg, var(--g900), var(--g800));
+    box-shadow: 0 14px 30px rgba(59,130,246,.35);
+    transform: translateY(-1px);
+}
+
+/* Footer link */
+.register-footer a{
+    color: var(--g800);
+}
+.register-footer a:hover{
+    color: var(--g700);
+}
+
+</style>
+
+<div class="container my-5">
+    <div class="card shadow-lg border-0 register-card">
+
+        <div class="card-header register-header text-center">
+            <h4 class="mb-0 fw-bold text-uppercase" style="letter-spacing:1px;">
+                <i class="fas fa-user-plus me-2"></i>Müşteri Kayıt Formu
+            </h4>
+        </div>
+
+        <div class="card-body px-5 py-4">
+            <form action="{{ url_for('auth.register') }}" method="POST">
+                <div class="row g-4">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Ad</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" name="ad" class="form-control"
+                                   placeholder="Adınız" required
+                                   onkeydown="return event.key !== 'Enter';"
+                                   oninput="this.value=this.value.replace(/[^a-zA-ZçÇğĞıİöÖşŞüÜ\s]/g,'')">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Soyad</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" name="soyad" class="form-control"
+                                   placeholder="Soyadınız" required
+                                   onkeydown="return event.key !== 'Enter';"
+                                   oninput="this.value=this.value.replace(/[^a-zA-ZçÇğĞıİöÖşŞüÜ\s]/g,'')">
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">E-Posta Adresi</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" name="eposta" class="form-control"
+                                   placeholder="ornek@email.com" required>
+                        </div>
+                        <div class="form-text small mt-1">
+                            <i class="fas fa-info-circle me-1"></i>Kiralama Rezervasyon bilgileri bu adrese gönderilecektir.
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Telefon Numarası</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-phone"></i>
+                            </span>
+                            <input
+                                type="tel"
+                                name="telefon"
+                                class="form-control"
+                                placeholder="05XXXXXXXXX"
+                                maxlength="11"
+                                minlength="11"
+                                pattern="^05[0-9]{9}$"
+                                inputmode="numeric"
+                                required
+                                oninput="
+                                    this.value = this.value.replace(/[^0-9]/g,'');
+                                    if (this.value.length > 11) this.value = this.value.slice(0,11);
+                                "
+                            >
+                        </div>
+                        <div class="form-text small text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Telefon numarası <strong>05</strong> ile başlamalı ve <strong>11 hane</strong> olmalıdır.
+                        </div>
+                    </div>
+
+                    
+
+                    <div class="col-md-6">
+                        <label class="form-label">TC Kimlik No</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                            <input type="text" name="tc_no" class="form-control"
+                                   placeholder="11 haneli TC No" 
+                                   maxlength="11" minlength="11"
+                                   pattern="[0-9]{11}"
+                                   inputmode="numeric"
+                                   required
+                                   oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Cinsiyet</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-venus-mars"></i></span>
+                            <select name="cinsiyet" class="form-select" required>
+                                <option value="" disabled selected>Seçiniz...</option>
+                                <option value="Erkek">Erkek</option>
+                                <option value="Kadın">Kadın</option>
+                                <option value="Belirtmek İstemiyorum">Belirtmek İstemiyorum</option>
+                            </select>
+                        </div>
+                    </div>
+
+                   
+
+                    <div class="col-md-6">
+                        <label class="form-label">Ehliyet Numarası</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-id-card-clip"></i></span>
+                            <input type="text" name="ehliyet_no" class="form-control"
+                                   placeholder="Ehliyet No Giriniz" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Doğum Tarihi</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                            <input type="date" name="dogum_tarihi" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Adres</label>
+                        <div class="input-group">
+                            <span class="input-group-text align-items-start pt-2">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </span>
+                            <textarea name="adres" class="form-control" rows="3"
+                                      placeholder="Açık adresiniz..." required></textarea>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Şifre</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" name="sifre" id="sifre" class="form-control" required>
+                            <button class="btn pw-btn" type="button" onclick="togglePassword('sifre', this)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Şifre Tekrar</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" name="confirm_sifre" id="confirm_sifre" class="form-control" required>
+                            <button class="btn pw-btn" type="button" onclick="togglePassword('confirm_sifre', this)">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-green px-5 py-2">
+                        <i class="fas fa-check-circle me-2"></i>Kaydı Tamamla
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card-footer bg-light text-center py-3 border-0 register-footer">
+            <small class="text-muted">
+                Zaten hesabınız var mı?
+                <a href="{{ url_for('auth.login') }}" class="fw-bold text-decoration-none">Giriş Yap</a>
+            </small>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function togglePassword(id, btn){
+    const input = document.getElementById(id);
+    const icon = btn.querySelector('i');
+    if(!input) return;
+
+    if(input.type === "password"){
+        input.type = "text";
+        if(icon){ icon.classList.remove("fa-eye"); icon.classList.add("fa-eye-slash"); }
+    }else{
+        input.type = "password";
+        if(icon){ icon.classList.remove("fa-eye-slash"); icon.classList.add("fa-eye"); }
+    }
+}
+</script>
+
+{% endblock %}

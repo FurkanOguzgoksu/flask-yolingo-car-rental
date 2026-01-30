@@ -1,0 +1,201 @@
+{% extends "layout.html" %}
+
+{% block title %}Kiralama Takvimi{% endblock %}
+
+{% block content %}
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css' rel='stylesheet' />
+
+<style>
+    /* --- TURUNCU TEMA AYARLARI --- */
+    :root {
+        --fc-button-bg-color: #0b1228;      /* Buton Arkaplan (Koyu Mavi) */
+        --fc-button-border-color: #0b1228;
+        --fc-button-hover-bg-color: #f97316; /* Hover Turuncu */
+        --fc-button-hover-border-color: #f97316;
+        --fc-button-active-bg-color: #ea580c;
+        
+        /* Etkinlik Arkaplanı (Turuncu) */
+        --fc-event-bg-color: #f97316;       
+        --fc-event-border-color: #f97316;
+        --fc-event-text-color: #fff;
+    }
+
+    .text-orange { color: #f97316 !important; }
+    
+    /* Takvim Başlık Butonları */
+    .fc .fc-button-primary {
+        background-color: var(--fc-button-bg-color);
+        border-color: var(--fc-button-border-color);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+
+    .fc .fc-button-primary:hover {
+        background-color: var(--fc-button-hover-bg-color);
+        border-color: var(--fc-button-hover-border-color);
+    }
+
+    /* Bugün butonu pasif hali */
+    .fc .fc-button-primary:disabled {
+        background-color: #64748b;
+        border-color: #64748b;
+    }
+
+    /* Etkinlik Kutuları (Event Bars) */
+    .fc-daygrid-event {
+        border-radius: 4px;
+        font-size: 0.85rem; /* Yazıyı biraz büyüttük */
+        padding: 4px 6px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        font-weight: 500;
+        white-space: normal; /* Uzun isimlerin alt satıra geçmesine izin ver */
+    }
+    .fc-daygrid-event:hover {
+        transform: scale(1.02);
+        filter: brightness(1.1);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        z-index: 5;
+    }
+
+    /* Günün Rengi */
+    .fc .fc-day-today {
+        background-color: rgba(249, 115, 22, 0.08) !important; /* Çok açık turuncu */
+    }
+</style>
+
+<div class="container py-3 mt-2">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">
+                <i class="fas fa-calendar-alt text-orange me-2"></i>Kiralama Takvimi
+            </h2>
+            <p class="text-muted small mb-0">Kiralama bilgilerini buradan takip edebilirsiniz.</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-dark rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i>Panele Dön
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <div class="row g-2 align-items-center">
+                <div class="col-auto">
+                    <label class="fw-bold text-secondary small me-2">Tarihe Git:</label>
+                </div>
+                <div class="col-md-3 col-6">
+                    <select id="jumpMonth" class="form-select border-secondary">
+                        <option value="01">Ocak</option>
+                        <option value="02">Şubat</option>
+                        <option value="03">Mart</option>
+                        <option value="04">Nisan</option>
+                        <option value="05">Mayıs</option>
+                        <option value="06">Haziran</option>
+                        <option value="07">Temmuz</option>
+                        <option value="08">Ağustos</option>
+                        <option value="09">Eylül</option>
+                        <option value="10">Ekim</option>
+                        <option value="11">Kasım</option>
+                        <option value="12">Aralık</option>
+                    </select>
+                </div>
+                <div class="col-md-2 col-6">
+                    <select id="jumpYear" class="form-select border-secondary">
+                        {% for y in range(2024, 2031) %}
+                            <option value="{{ y }}">{{ y }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button id="jumpBtn" class="btn btn-dark fw-bold">
+                        <i class="fas fa-search me-1"></i> Git
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-body p-4">
+            <div id='calendar'></div>
+        </div>
+    </div>
+</div>
+
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js'></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('calendar');
+        
+        var now = new Date();
+        document.getElementById('jumpMonth').value = String(now.getMonth() + 1).padStart(2, '0');
+        document.getElementById('jumpYear').value = now.getFullYear();
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'tr',
+            themeSystem: 'bootstrap5',
+            firstDay: 1,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listWeek'
+            },
+            buttonText: {
+                today: 'Bugün',
+                month: 'Ay',
+                week: 'Hafta',
+                list: 'Liste'
+            },
+            events: '/api/calendar-events',
+            
+            eventClick: function(info) {
+                // Bilgiyi ayır
+                let titleParts = info.event.title.split('|');
+                let musteri = titleParts[0] || info.event.title;
+                let arac = titleParts[1] || '';
+
+                // Tarihi formatla
+                let tarihStr = info.event.start.toLocaleDateString('tr-TR');
+                
+                // Eğer bitiş tarihi varsa aralık olarak göster (Örn: 10.12.2025 - 12.12.2025)
+                if (info.event.end) {
+                    tarihStr += ' - ' + info.event.end.toLocaleDateString('tr-TR');
+                }
+
+                Swal.fire({
+                    title: 'Kiralama Detayı',
+                    html: `
+                        <div class="text-start fs-6">
+                            <p class="mb-2"><strong>Müşteri:</strong> ${musteri}</p>
+                            <p class="mb-2"><strong>Araç:</strong> ${arac}</p>
+                            <p class="mb-0"><strong>Tarih:</strong> ${tarihStr}</p>
+                        </div>
+                    `,
+                    icon: 'info',
+                    confirmButtonText: 'Tamam',
+                    confirmButtonColor: '#f97316'
+                });
+            },
+            eventTimeFormat: { 
+                hour: '2-digit',
+                minute: '2-digit',
+                meridiem: false
+            }
+        });
+
+        calendar.render();
+
+        // Tarihe Git Butonu İşlevi
+        document.getElementById('jumpBtn').addEventListener('click', function() {
+            var m = document.getElementById('jumpMonth').value;
+            var y = document.getElementById('jumpYear').value;
+            var newDate = y + '-' + m + '-01';
+            calendar.gotoDate(newDate);
+        });
+    });
+</script>
+{% endblock %}

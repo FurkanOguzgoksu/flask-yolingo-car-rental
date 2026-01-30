@@ -1,0 +1,249 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-5 mt-5 payment-container">
+
+    <div class="row g-5">
+
+        <div class="col-12 mb-4">
+            <div class="card bg-dark text-white border-warning shadow-lg">
+                <div class="card-header bg-warning text-dark fw-bold">
+                    <i class="fas fa-receipt me-2"></i>Sipariş Özeti
+                </div>
+
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <img src="{{ url_for('static', filename='img/' + (arac.resim_url if arac.resim_url else 'default_car.jpg')) }}"
+                             class="rounded me-3 border border-secondary"
+                             style="width:120px; height:80px; object-fit:cover;" 
+                             alt="Araç">
+
+                        <div>
+                            <h5 class="mb-0 text-warning summary-title">{{ arac.marka }} {{ arac.model }}</h5>
+
+                            <small class="text-secondary summary-subtitle">
+                                {{ session['kiralama_bilgi']['gun_sayisi'] }} Günlük Kiralama
+                            </small>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary">
+
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Araç ve Hizmetler Toplamı:</span>
+                        <span class="fs-5 summary-text" id="hamFiyat">
+                            {{ "{:,.2f}".format(session['kiralama_bilgi']['toplam_ucret']) }} TL
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-2 border-top border-secondary">
+                        <span class="fs-4 fw-bold">ÖDENECEK TUTAR:</span>
+                        <span class="fs-2 fw-bold text-warning summary-total"
+                            id="displayTutar">
+                            {{ "{:,.2f}".format(session['kiralama_bilgi']['toplam_ucret']) }} TL
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <h3 class="fw-bold mb-4 text-dark">
+                <i class="fas fa-shield-alt text-success me-2"></i>Güvenli Ödeme
+            </h3>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <form action="{{ url_for('rental.odeme_yap') }}" method="POST">
+
+                        <input type="hidden" name="final_tutar"
+                            id="inputFinalTutar"
+                            value="{{ session['kiralama_bilgi']['toplam_ucret'] }}">
+
+                        <input type="hidden" name="uygulanan_kod"
+                            id="inputKod" value="">
+
+                        <div class="mb-4">
+                            <label class="fw-bold text-muted">Ödeme Yöntemi</label>
+                            <select class="form-select" name="odeme_turu" id="odemeTuru">
+                                <option value="Kredi Kartı">Kredi Kartı / Banka Kartı</option>
+                                <option value="Havale">Havale / EFT</option>
+                            </select>
+                        </div>
+
+                        <div id="kartBilgileri">
+                            <div class="mb-4">
+                                <label class="fw-bold text-muted">Kart Üzerindeki İsim</label>
+                                <input type="text"
+                                    class="form-control"
+                                    name="kart_sahibi"
+                                    id="kartSahibi"
+                                    placeholder="Ad Soyad"
+                                    required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="fw-bold text-muted">Kart Numarası</label>
+                                <input type="text"
+                                    class="form-control"
+                                    name="kart_no"
+                                    id="kartNo"
+                                    placeholder="0000 0000 0000 0000"
+                                    maxlength="19"
+                                    required>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-6">
+                                    <label class="fw-bold text-muted">Son Kullanma Tarihi</label>
+                                    <div class="d-flex gap-2">
+                                        <select class="form-select" name="sk_ay" required>
+                                            <option value="" disabled selected>Ay</option>
+                                            {% for i in range(1, 13) %}
+                                                <option value="{{ '%02d' % i }}">{{ '%02d' % i }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <select class="form-select" name="sk_yil" required>
+                                            <option value="" disabled selected>Yıl</option>
+                                            {% set bu_yil = 2025 %}
+                                            {% for i in range(bu_yil, bu_yil + 15) %}
+                                                <option value="{{ i }}">{{ i }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <label class="fw-bold text-muted">CVV</label>
+                                    <input type="text"
+                                        class="form-control"
+                                        name="cvv"
+                                        maxlength="3"
+                                        placeholder="***"
+                                        required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="ibanBilgisi" class="d-none">
+                            <div class="alert alert-info">
+                                <h6 class="fw-bold mb-2">
+                                    <i class="fas fa-university me-2"></i>Havale / EFT Bilgileri
+                                </h6>
+
+                                <p class="mb-1"><strong>Banka:</strong> Ziraat Bankası</p>
+                                <p class="mb-1"><strong>Alıcı:</strong> Yolingo Araç Kiralama A.Ş.</p>
+
+                                <div class="bg-light text-dark p-3 rounded fw-bold text-center fs-5">
+                                    TR12 0001 0000 1234 5678 90
+                                </div>
+
+                                <small class="text-muted d-block mt-2">
+                                    Açıklama kısmına <strong>Ad Soyad</strong> yazınız.
+                                </small>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-dark w-100 py-3 fs-5 fw-bold shadow-lg mt-3">
+                            <i class="fas fa-lock me-2"></i>
+                            <span id="btnTutar">
+                                {{ "{:,.2f}".format(session['kiralama_bilgi']['toplam_ucret']) }} TL
+                            </span>
+                            ÖDE
+                        </button>
+
+                        <div class="text-center mt-4 text-muted">
+                            <small>
+                                <i class="fas fa-lock text-success"></i>
+                                256-Bit SSL ile güvenli ödeme
+                            </small>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+:root{
+    --yolingo-orange:#f97316;
+    --yolingo-orange-dark:#ea580c;
+}
+.text-warning{ color:var(--yolingo-orange)!important; }
+.bg-warning{ background:var(--yolingo-orange)!important; color:#111!important; }
+.border-warning{ border-color:var(--yolingo-orange)!important; }
+.btn-warning{
+    background:var(--yolingo-orange)!important;
+    border-color:var(--yolingo-orange)!important;
+    color:#fff!important;
+}
+.btn-warning:hover{
+    background:var(--yolingo-orange-dark)!important;
+    border-color:var(--yolingo-orange-dark)!important;
+}
+.payment-container{
+    padding-left: 24px;
+    padding-right: 24px;
+}
+@media (min-width: 992px){
+    .payment-container{
+        padding-left: 48px;
+        padding-right: 48px;
+    }
+}
+.summary-title{ font-size: 2.2rem; font-weight: 700; }
+.summary-subtitle{ font-size: 1.7rem; }
+.summary-text{ font-size: 1.15rem; }
+.summary-total{ font-size: 2.5rem; font-weight: 800; }
+</style>
+
+<script>
+// Kart Sahibi: Sadece harf ve boşluk
+document.getElementById('kartSahibi').addEventListener('input', function(){
+    this.value = this.value.replace(/[^a-zA-ZğüşıöçĞÜŞİÖÇ\s]/g, '');
+});
+
+// Kart No: Sadece rakam ve 4 hanede bir boşluk
+document.getElementById('kartNo').addEventListener('input', function(e){
+    let value = e.target.value.replace(/\D/g, '').substring(0, 16);
+    e.target.value = value.match(/.{1,4}/g)?.join(' ') || value;
+});
+
+// Ödeme Tipi Değişimi
+document.addEventListener("DOMContentLoaded", function () {
+    const odemeTuru = document.getElementById("odemeTuru");
+    const kartBilgileri = document.getElementById("kartBilgileri");
+    const ibanBilgisi = document.getElementById("ibanBilgisi");
+    
+    // Kart alanındaki tüm input ve selectleri seçiyoruz
+    const kartInputlari = kartBilgileri.querySelectorAll("input, select");
+
+    function toggleOdeme() {
+        if (odemeTuru.value === "Havale") {
+            // Havale seçildiyse: Kartı gizle, IBAN'ı göster
+            kartBilgileri.classList.add("d-none");
+            ibanBilgisi.classList.remove("d-none");
+            
+            // Kart inputlarını devre dışı bırak (Required hatasını engeller)
+            kartInputlari.forEach(el => el.disabled = true);
+        } else {
+            // Kredi Kartı seçildiyse: Kartı göster, IBAN'ı gizle
+            kartBilgileri.classList.remove("d-none");
+            ibanBilgisi.classList.add("d-none");
+            
+            // Kart inputlarını tekrar aktif et
+            kartInputlari.forEach(el => el.disabled = false);
+        }
+    }
+
+    odemeTuru.addEventListener("change", toggleOdeme);
+    toggleOdeme(); // Sayfa yüklendiğinde çalıştır
+});
+</script>
+
+{% endblock %}

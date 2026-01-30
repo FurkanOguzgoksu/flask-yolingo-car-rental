@@ -1,0 +1,135 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4 mt-3">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark"><i class="fas fa-heart text-warning me-2"></i>Favori Araçlarım</h2>
+        
+    </div>
+
+    {% if araclar %}
+        <div class="row g-4">
+            {% for arac in araclar %}
+            <div class="col-lg-6">
+                <div class="card bg-white shadow-sm border-0 h-100 overflow-hidden">
+                    <div class="row g-0 h-100">
+                        <div class="col-md-5 position-relative">
+                            <img src="{{ url_for('static', filename='img/' + arac.resim_url) }}" 
+                                 class="img-fluid h-100 w-100" style="object-fit: cover;" alt="Araç">
+                            
+                            <button onclick="favSayfasindanSil({{ arac.arac_id }}, this)" 
+                                    class="btn btn-danger btn-sm position-absolute top-0 start-0 m-2 shadow"
+                                    title="Favorilerden Kaldır">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+
+                        <div class="col-md-7">
+                            <div class="card-body d-flex flex-column h-100">
+                                <h5 class="fw-bold text-dark mb-1">{{ arac.marka }} {{ arac.model }}</h5>
+                                <div class="mb-2">
+                                    <span class="badge bg-light text-dark border"><i class="fas fa-gas-pump text-warning"></i> {{ arac.yakit_turu }}</span>
+                                    <span class="badge bg-light text-dark border"><i class="fas fa-cogs text-warning"></i> {{ arac.vites_turu }}</span>
+                                </div>
+                                
+                                <h4 class="text-warning fw-bold mt-auto">{{ arac.gunluk_ucret }} TL <small class="text-muted fs-6">/Gün</small></h4>
+                                
+                                <a href="{{ url_for('rental.kiralama', arac_id=arac.arac_id) }}" class="btn btn-dark w-100 mt-2">
+                                    KİRALA <i class="fas ms-2 text-warning"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <div class="text-muted display-1 mb-3"><i class="far fa-heart"></i></div>
+            <h4>Henüz favori aracınız yok.</h4>
+            <p class="text-muted">Beğendiğiniz araçları kalp ikonuna tıklayarak buraya ekleyebilirsiniz.</p>
+            <a href="{{ url_for('index') }}" class="btn btn-warning fw-bold px-4 mt-2">Araçları İncele</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+:root{
+    --yolingo-orange: #f97316;       /* ana turuncu */
+    --yolingo-orange-dark: #ea580c;  /* hover */
+}
+
+/* TEXT */
+.text-warning{
+    color: var(--yolingo-orange) !important;
+}
+
+/* ICONS */
+.text-warning i,
+i.text-warning{
+    color: var(--yolingo-orange) !important;
+}
+
+/* BACKGROUND */
+.bg-warning{
+    background-color: var(--yolingo-orange) !important;
+    color: #111 !important;
+}
+
+/* BORDER */
+.border-warning{
+    border-color: var(--yolingo-orange) !important;
+}
+
+/* BUTTONS */
+.btn-warning{
+    background-color: var(--yolingo-orange) !important;
+    border-color: var(--yolingo-orange) !important;
+    color: #fff !important;
+}
+.btn-warning:hover{
+    background-color: var(--yolingo-orange-dark) !important;
+    border-color: var(--yolingo-orange-dark) !important;
+}
+
+/* BADGE (yakıt, vites ikonları vs.) */
+.badge i.text-warning{
+    color: var(--yolingo-orange) !important;
+}
+
+/* LINK & ICON INSIDE BUTTON */
+.btn .text-warning{
+    color: var(--yolingo-orange) !important;
+}
+
+/* HEART ICON (boş durum) */
+.fa-heart,
+.far.fa-heart{
+    color: var(--yolingo-orange) !important;
+}
+</style>
+
+
+<script>
+function favSayfasindanSil(aracId, btnElement) {
+    // Sayfa yenilenmeden listeden silmek için
+    fetch(`/toggle-favori/${aracId}`, {method: 'POST'})
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success' && data.action === 'removed') {
+            // Kartı animasyonla yok et
+            const cardCol = btnElement.closest('.col-lg-6');
+            cardCol.style.transition = "all 0.5s";
+            cardCol.style.opacity = "0";
+            cardCol.style.transform = "scale(0.8)";
+            setTimeout(() => cardCol.remove(), 500);
+            
+            // Eğer sonuncuyu sildiyse sayfayı yenile (boş ekranı göstermek için)
+            const kartSayisi = document.querySelectorAll('.col-lg-6').length;
+            if(kartSayisi <= 1) setTimeout(() => location.reload(), 500);
+        }
+    });
+}
+</script>
+{% endblock %}

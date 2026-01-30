@@ -1,0 +1,321 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<div class="page-bg">
+    <div class="container py-3 mt-2">
+        <div class="row">
+
+            <div class="col-lg-4 mb-4">
+                <div class="card bg-soft-dark text-light border-warning shadow-lg h-100">
+                    <div class="card-body">
+                        
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block mb-3">
+                                <img src="{{ url_for('static', filename='img/profiles/' + (user.ProfilResim if user.ProfilResim else 'default_user.png')) }}"
+                                     class="rounded-circle border border-3 border-warning"
+                                     style="width:130px;height:130px;object-fit:cover;">
+                            </div>
+                            <h4 class="profile-name mb-1">{{ user.ad }} {{ user.soyad }}</h4>
+                            <div class="text-white opacity-75 small">{{ user.eposta }}</div>
+                        </div>
+
+                        <hr class="border-secondary my-4">
+
+                        <div class="nav flex-column profile-menu-container">
+                            <button class="custom-menu-btn active" data-bs-toggle="pill" data-bs-target="#info">
+                                <i class="fas fa-user-edit"></i> Bilgileri Düzenle
+                            </button>
+
+                            <button class="custom-menu-btn" data-bs-toggle="pill" data-bs-target="#pass">
+                                <i class="fas fa-key"></i> Şifre Değiştir
+                            </button>
+
+                            <a href="{{ url_for('customer.favorilerim') }}" class="custom-menu-btn">
+                                <i class="fas fa-heart"></i> Favorilerim
+                            </a>
+
+                            <a href="{{ url_for('rental.kiralamalarim') }}" class="custom-menu-btn">
+                                <i class="fas fa-history"></i> Kiralama Geçmişi
+                            </a>
+
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-light w-100 mt-3 py-2">
+                                <i class="fas fa-home me-2"></i> Anasayfaya Dön
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card bg-soft-dark text-light shadow-lg h-100">
+                    <div class="card-body p-5">
+                        
+                        <div class="tab-content">
+
+                            <div class="tab-pane fade show active" id="info">
+                                <h4 class="fw-bold text-warning mb-4 border-bottom border-secondary pb-2">
+                                    <i class="fas fa-user-circle me-2"></i>Profil Bilgileri
+                                </h4>
+
+                                <form method="POST" enctype="multipart/form-data">
+                                    <input type="hidden" name="action" value="bilgi_guncelle">
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Ad</label>
+                                            <input type="text" class="form-control bg-dark" name="ad" value="{{ user.ad }}">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Soyad</label>
+                                            <input type="text" class="form-control bg-dark" name="soyad" value="{{ user.soyad }}">
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">E-Mail (Değiştirilemez)</label>
+                                            <input type="email" class="form-control bg-secondary text-light border-secondary"
+                                                   value="{{ user.eposta }}" disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Telefon</label>
+                                            <input type="tel" class="form-control bg-dark" name="telefon" value="{{ user.telefon }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">TC Kimlik No (Değiştirilemez)</label>
+                                            <input type="text"
+                                                   class="form-control bg-secondary text-light border-secondary"
+                                                   value="{{ user.tc_kimlik_no }}"
+                                                   disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Cinsiyet</label>
+                                            <select class="form-control bg-dark" name="cinsiyet">
+                                                <option value="Kadın" {{ 'selected' if user.cinsiyet == 'Kadın' else '' }}>Kadın</option>
+                                                <option value="Erkek" {{ 'selected' if user.cinsiyet == 'Erkek' else '' }}>Erkek</option>
+                                                <option value="Belirtmek İstemiyorum"
+                                                    {{ 'selected' if user.cinsiyet == 'Belirtmek İstemiyorum' else '' }}>
+                                                    Belirtmek İstemiyorum
+                                                </option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <label class="form-label text-muted">Ehliyet No (Değiştirilemez)</label>
+                                            <input type="text"
+                                                   class="form-control bg-secondary text-light border-secondary"
+                                                   value="{{ user.ehliyet_no }}"
+                                                   disabled>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Doğum Tarihi</label>
+                                            <input type="date"
+                                                   class="form-control bg-dark"
+                                                   name="dogum_tarihi"
+                                                   value="{{ user.dogum_tarihi }}">
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3 mt-2">
+                                        <div class="col-12">
+                                            <label class="form-label">Adres</label>
+                                            <textarea class="form-control bg-dark" name="adres" rows="3">{{ user.adres or '' }}</textarea>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Profil Resmi Güncelle</label>
+                                            <input type="file" class="form-control bg-dark" name="profil_resim">
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4 text-end">
+                                        <button class="btn btn-warning fw-bold px-4 text-white">
+                                            <i class="fas fa-save me-2"></i>Değişiklikleri Kaydet
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="tab-pane fade" id="pass">
+                                <h4 class="fw-bold text-warning mb-4 border-bottom border-secondary pb-2">
+                                    <i class="fas fa-lock me-2"></i>Güvenlik Ayarları
+                                </h4>
+
+                                <form method="POST">
+                                    <input type="hidden" name="action" value="sifre_degistir">
+
+                                    <div class="mb-4">
+                                        <label class="form-label">Mevcut Şifre</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control bg-dark border-end-0" name="eski_sifre" id="eski_sifre">
+                                            <button class="btn btn-outline-secondary bg-dark border-start-0 text-white" type="button" onclick="togglePassword('eski_sifre', this)" style="border-color: #6c757d;">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Yeni Şifre</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control bg-dark border-end-0" name="yeni_sifre" id="yeni_sifre">
+                                                <button class="btn btn-outline-secondary bg-dark border-start-0 text-white" type="button" onclick="togglePassword('yeni_sifre', this)" style="border-color: #6c757d;">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Yeni Şifre (Tekrar)</label>
+                                            <div class="input-group">
+                                                <input type="password" class="form-control bg-dark border-end-0" name="yeni_sifre_tekrar" id="yeni_sifre_tekrar">
+                                                <button class="btn btn-outline-secondary bg-dark border-start-0 text-white" type="button" onclick="togglePassword('yeni_sifre_tekrar', this)" style="border-color: #6c757d;">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-4 text-end">
+                                        <button class="btn btn-warning fw-bold px-4 text-white">
+                                            <i class="fas fa-sync-alt me-2"></i>Şifreyi Güncelle
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    :root{
+        --yolingo-orange: #f97316;
+        --yolingo-orange-dark: #ea580c;
+        --soft-dark:#3f444b;
+        --input-dark:#4a5058;
+    }
+
+    .page-bg {
+        background-color: #f3f4f6;
+        min-height: 100vh;
+        padding-bottom: 40px;
+    }
+
+    .bg-soft-dark{
+        background: var(--soft-dark) !important;
+    }
+
+    .text-warning {
+        color: var(--yolingo-orange) !important;
+    }
+    
+    .border-warning {
+        border-color: var(--yolingo-orange) !important;
+    }
+
+    .btn-warning {
+        background-color: var(--yolingo-orange) !important;
+        border-color: var(--yolingo-orange) !important;
+        color: #fff !important;
+    }
+    .btn-warning:hover {
+        background-color: var(--yolingo-orange-dark) !important;
+        border-color: var(--yolingo-orange-dark) !important;
+    }
+
+    .form-control.bg-dark,
+    textarea.bg-dark{
+        background: var(--input-dark) !important;
+        color: #fff !important;
+        border: 1px solid #6c757d;
+    }
+    
+    .form-control.bg-dark:focus{
+        background: var(--input-dark) !important;
+        color: #fff !important;
+        border-color: var(--yolingo-orange);
+        box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.25);
+    }
+
+    .profile-name{
+        color:#ffffff !important;
+        font-weight:600;
+    }
+    
+    .profile-menu-container{
+        margin-top: 30px;
+    }
+
+    .custom-menu-btn {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 12px 15px;
+        margin-bottom: 12px;
+        color: var(--yolingo-orange);
+        border: 1px solid var(--yolingo-orange);
+        border-radius: 8px;
+        background: transparent;
+        text-align: left;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .custom-menu-btn i {
+        width: 30px;
+        text-align: center;
+        margin-right: 10px;
+        font-size: 1.1rem;
+    }
+
+    .custom-menu-btn:hover {
+        background-color: rgba(249, 115, 22, 0.1);
+        color: var(--yolingo-orange);
+    }
+
+    .custom-menu-btn.active {
+        background-color: var(--yolingo-orange) !important;
+        color: #fff !important;
+        border-color: var(--yolingo-orange);
+    }
+    
+    a.custom-menu-btn:hover {
+        background-color: var(--yolingo-orange);
+        color: #fff;
+    }
+</style>
+
+<script>
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const icon = btn.querySelector('i');
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+            icon.style.color = "var(--yolingo-orange)"; 
+        } else {
+            input.type = "password";
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+            icon.style.color = "white"; 
+        }
+    }
+</script>
+
+{% endblock %}

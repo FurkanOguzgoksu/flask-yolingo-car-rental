@@ -1,0 +1,540 @@
+{% extends "layout.html" %}
+
+{% block title %}Araç Kiralama - Ana Sayfa{% endblock %}
+
+{% block body %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+    /* --- HERO ALANI --- */
+    .hero-wrapper {
+        position: relative;
+        min-height: 650px;
+        width: 100%;
+        overflow: hidden;
+        border-radius: 0 0 50px 50px;
+        margin-bottom: 50px;
+        margin-top: -30px;
+    }
+
+    .hero-bg {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background-image: url("{{ url_for('static', filename='img/logo.png') }}");
+        background-size: cover;
+        background-position: center 30%; 
+        z-index: 1;
+        animation: slowZoom 20s infinite alternate;
+    }
+
+    @keyframes slowZoom {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.10); }
+    }
+
+    .hero-overlay {
+        position: absolute; top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.8) 100%);
+        z-index: 2;
+    }
+
+    /* --- HERO DÜZENİ --- */
+    .hero-container {
+        position: relative;
+        z-index: 3;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-top: 80px;
+        padding-bottom: 60px;
+    }
+
+    /* BAŞLIK ALANI */
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        line-height: 1;
+        margin-bottom: 30px;
+        color: #fff;
+        text-shadow: 0 4px 20px rgba(0,0,0,0.9);
+        white-space: nowrap;
+    }
+
+    .hero-title span {
+        color: #38bdf8;
+        margin-left: 15px;
+    }
+
+    .hero-desc {
+        font-size: 1.2rem;
+        color: #e5e7eb;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+        font-weight: 500;
+        max-width: 700px;
+        margin: 0 auto 40px auto;
+        line-height: 1.6;
+    }
+
+    /* ÖZELLİKLER */
+    .hero-features {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 25px;
+        color: #fff;
+        font-weight: 600;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+        font-size: 0.95rem;
+    }
+    
+    .hero-features span {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 8px 16px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(5px);
+    }
+
+    /* --- FİLTRE PANELİ --- */
+    .filter-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 30px;
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .filter-label {
+        color: #e5e7eb;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+        display: block;
+        text-align: left;
+    }
+
+    .filter-input {
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        height: 50px;
+        border-radius: 12px;
+        padding: 0 15px;
+        width: 100%;
+        font-weight: 700;
+        color: #1f2937;
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .filter-input:focus {
+        background: #fff;
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.4);
+    }
+
+    .submit-btn {
+        background: #f97316; /* Turuncu */
+        color: #fff;
+        font-weight: 800;
+        width: 100%;
+        height: 50px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .submit-btn:hover {
+        background: #ea580c; /* Koyu Turuncu */
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(249, 115, 22, 0.4);
+    }
+
+    .adv-toggle-link {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 10px;
+        transition: color 0.2s;
+        cursor: pointer;
+    }
+    .adv-toggle-link:hover { color: #fff; }
+
+    .advanced-options {
+        display: none;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid rgba(255,255,255,0.15);
+    }
+    .advanced-options.show { display: block; }
+
+    /* --- ORTAK RENK STİLLERİ --- */
+    /* Turuncu Override */
+    .text-orange { color: #f97316 !important; }
+    .price-orange { color: #f97316 !important; }
+    .bg-orange { background-color: #f97316 !important; color: #fff !important; }
+    .border-orange { border-color: #f97316 !important; }
+    
+    .btn-orange {
+        background-color: #f97316 !important;
+        border-color: #f97316 !important;
+        color: #fff !important;
+        font-weight: 700;
+    }
+    .btn-orange:hover {
+        background-color: #ea580c !important;
+        border-color: #ea580c !important;
+        box-shadow: 0 5px 15px rgba(249, 115, 22, 0.3);
+    }
+
+    .badge-blue{ background-color: #1e3a8a !important; color:#fff !important; border-radius: 10px; padding: 6px 10px; font-weight: 700; }
+    
+    /* ARAÇ RESİM STİLİ (DÜZENLENDİ) */
+    .car-img { 
+        height: 150px; /* 170px'den 150px'e düşürüldü */
+        object-fit: contain; 
+        padding: 20px; /* 10px'den 20px'e çıkarıldı (resim daha küçük görünür) */
+        background: #fff; 
+    }
+    
+    /* Favori butonu */
+    .btn-heart{ width: 40px; height: 40px; background: rgba(15, 23, 42, 0.75) !important; border: none !important; z-index: 10; }
+    .btn-heart:hover{ background: rgba(15, 23, 42, 0.90) !important; }
+    .btn-heart i{ transition: transform .2s ease, color .2s ease; }
+    .btn-heart:hover i{ transform: scale(1.15); }
+
+    .kirala-btn{ padding: 6px 16px; font-size: 0.9rem; font-weight: 700; }
+
+    @media (max-width: 992px) {
+        .hero-title { font-size: 2.2rem; white-space: normal; } 
+        .filter-card { padding: 20px; }
+        .hero-container { padding-top: 40px; padding-bottom: 40px; }
+    }
+</style>
+
+<div class="hero-wrapper shadow-lg">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-container container text-center">
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-12">
+                <h1 class="hero-title">
+                    HER YOLCULUKTA<span>YOLINGO YANINDA</span>
+                </h1>
+                <p class="hero-desc">
+                    İhtiyacınız olan aracı dakikalar içinde kiralayın.<br>
+                    Uygun fiyat, hızlı kiralama, güvenli sürüş.
+                </p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center w-100 mx-auto">
+            <div class="col-lg-10">
+                
+                <div class="hero-features">
+                    <span><i class="fas fa-check-circle text-orange me-1"></i> Sigortalı ve Güvenli</span>
+                    <span><i class="fas fa-map-marker-alt text-orange me-1"></i> Farklı Şehirde Teslim</span>
+                    <span><i class="fas fa-bolt text-orange me-1"></i> Anında Kiralama</span>
+                    <span><i class="fas fa-headset text-orange me-1"></i> 7/24 Destek</span>
+                </div>
+
+                <div class="filter-card">
+                    <form action="{{ url_for('index') }}" method="GET" id="heroFilterForm">
+                        
+                        <div class="row g-3 align-items-end">
+                            
+                            <div class="col-lg-3 col-md-6">
+                                <label class="filter-label"><i class="fas fa-map-marker-alt me-1 text-warning"></i> Alış Yeri</label>
+                                <select class="filter-input" name="sehir_id" id="sehirSelect" onchange="haritayiGuncelle(this.value)">
+                                    <option value="">Tüm Şehirler</option>
+                                    {% for sehir in sehirler %}
+                                        <option value="{{ sehir.sehir_id }}" {% if secilen_sehir_id|string == sehir.sehir_id|string %}selected{% endif %}>{{ sehir.sehir_ad }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="col-lg-3 col-md-6">
+                                <label class="filter-label"><i class="fas fa-calendar-alt me-1 text-warning"></i> Alış Tarihi</label>
+                                <input type="date" name="baslangic" id="baslangic" class="filter-input" value="{{ request.args.get('baslangic') }}">
+                            </div>
+
+                            <div class="col-lg-3 col-md-6">
+                                <label class="filter-label"><i class="fas fa-calendar-check me-1 text-warning"></i> İade Tarihi</label>
+                                <input type="date" name="bitis" id="bitis" class="filter-input" value="{{ request.args.get('bitis') }}">
+                            </div>
+
+                            <div class="col-lg-3 col-md-6">
+                                <button type="submit" class="submit-btn">
+                                    ARAÇ BUL <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <div class="advanced-options" id="advancedPanel">
+                            <div class="row g-3">
+                                
+                                <div class="col-md-3">
+                                    <label class="filter-label small text-warning mb-1">
+                                        <i class="fas fa-cogs me-1"></i> VİTES TİPİ
+                                    </label>
+                                    <select name="vites" class="filter-input h-auto py-2 fs-6">
+                                        <option value="">Tümü</option>
+                                        <option value="Otomatik" {% if request.args.get('vites') == 'Otomatik' %}selected{% endif %}>Otomatik</option>
+                                        <option value="Manuel" {% if request.args.get('vites') == 'Manuel' %}selected{% endif %}>Manuel</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="filter-label small text-warning mb-1">
+                                        <i class="fas fa-gas-pump me-1"></i> YAKIT TİPİ
+                                    </label>
+                                    <select name="yakit" class="filter-input h-auto py-2 fs-6">
+                                        <option value="">Tümü</option>
+                                        <option value="Benzin" {% if request.args.get('yakit') == 'Benzin' %}selected{% endif %}>Benzin</option>
+                                        <option value="Dizel" {% if request.args.get('yakit') == 'Dizel' %}selected{% endif %}>Dizel</option>
+                                        <option value="Elektrik" {% if request.args.get('yakit') == 'Elektrik' %}selected{% endif %}>Elektrik</option>
+                                        <option value="Hibrit" {% if request.args.get('yakit') == 'Hibrit' %}selected{% endif %}>Hibrit</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="filter-label small text-warning mb-1">
+                                        <i class="fas fa-arrow-down me-1"></i> MİN FİYAT
+                                    </label>
+                                    <input type="number" name="min_fiyat" class="filter-input h-auto py-2 fs-6" 
+                                           placeholder="0" 
+                                           value="{{ request.args.get('min_fiyat') }}">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="filter-label small text-warning mb-1">
+                                        <i class="fas fa-arrow-up me-1"></i> MAX FİYAT
+                                    </label>
+                                    <input type="number" name="max_fiyat" class="filter-input h-auto py-2 fs-6" 
+                                           placeholder="Maksimum" 
+                                           value="{{ request.args.get('max_fiyat') }}">
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div onclick="document.getElementById('advancedPanel').classList.toggle('show')" class="adv-toggle-link">
+                            <i class="fas fa-sliders-h"></i> Gelişmiş Filtreler
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="container-fluid px-5">
+    <div class="row">
+
+        <div class="col-lg-12">
+            <div id="map" class="hover-card"></div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                <h3 class="fw-bold mb-0"><i class="fas fa-car me-2 text-dark"></i>Premium Filo</h3>
+                <span class="badge bg-dark p-2">{{ araclar|length }} Müsait Araç</span>
+            </div>
+
+            <div class="row mb-5">
+                {% if araclar %}
+                    {% for arac in araclar %}
+                    <div class="col-md-6 col-lg-3 mb-4">
+                        <div class="card h-100 shadow-sm border-0 position-relative hover-card">
+
+                        <div class="position-relative">
+                            <button onclick="toggleFavori({{ arac.arac_id }}, this)"
+                                    class="btn btn-heart position-absolute top-0 end-0 m-3 rounded-circle shadow d-flex align-items-center justify-content-center">
+                            <i class="{{ 'fas text-orange' if fav_ids and arac.arac_id in fav_ids else 'far text-white' }} fa-heart fs-5"></i>
+                            </button>
+
+                            <span class="badge badge-blue position-absolute top-0 start-0 m-3 shadow">
+                            {{ arac.yakit_turu }}
+                            </span>
+
+                            <img src="{{ url_for('static', filename='img/' + arac.resim_url) }}"
+                                class="card-img-top car-img"
+                                alt="{{ arac.marka }}">
+                        </div>
+
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-center mb-1">{{ arac.marka }} {{ arac.model }}</h5>
+
+                            <div class="text-center text-muted small mb-3">
+                            <i class="fas fa-map-marker-alt text-orange me-1"></i>
+                            {{ arac.sehir_ad }} &bull; {{ arac.yil }}
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center border-top pt-3 mt-2">
+                                <div>
+                                    <span class="h4 fw-bold price-orange">{{ arac.gunluk_ucret }} ₺</span>
+                                    <small class="text-muted">/gün</small>
+                                </div>
+
+                                <a href="{{ url_for('rental.kiralama', arac_id=arac.arac_id, baslangic=request.args.get('baslangic'), bitis=request.args.get('bitis')) }}"
+                                   class="btn btn-orange kirala-btn rounded-pill shadow-sm">
+                                    Kirala
+                                </a>
+                            </div>
+                        </div>
+
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                    <div class="alert alert-light text-center border shadow-sm py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>Aradığınız kriterlere uygun araç bulunamadı.</h5>
+                        <p class="text-muted">Lütfen filtreleri değiştirerek tekrar deneyin.</p>
+                    </div>
+                    </div>
+                {% endif %}
+                </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="mb-5 bg-light p-5 rounded-3 container hover-card" id="yorumlarBolumu">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Gelen Geri Bildirimler</h2>
+        <p class="text-muted">Sizden gelen gerçek geri bildirimler.</p>
+        {% if session.get('role') == 'musteri' %}
+            <button class="btn btn-orange fw-bold px-4 rounded-pill" data-bs-toggle="modal" data-bs-target="#yorumModal">
+                <i class="fas fa-pen me-2"></i>Yorum Yaz
+            </button>
+        {% endif %}
+    </div>
+    <div class="row">
+        {% for yorum in yorumlar %}
+        <div class="col-md-4 mb-3">
+            <div class="card border-0 shadow-sm h-100 hover-card">
+                <div class="card-body p-4">
+                    <div class="text-orange mb-3">{% for i in range(yorum.puan) %}<i class="fas fa-star"></i>{% endfor %}</div>
+                    <p class="fst-italic text-secondary">"{{ yorum.yorum_metni }}"</p>
+                    <div class="d-flex align-items-center mt-4">
+                        <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow" style="width: 45px; height: 45px;">
+                            {{ yorum.ad[0] }}{{ yorum.soyad_bas_harf }}
+                        </div>
+                        <div class="ms-3">
+                            <h6 class="mb-0 fw-bold">{{ yorum.ad }} {{ yorum.soyad_bas_harf }}.</h6>
+                            <small class="text-muted" style="font-size: 12px;">{{ yorum.sehir_ad or 'Müşteri' }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+            <p class="text-center text-muted">Henüz onaylanmış yorum yok.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal fade" id="yorumModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-orange text-white">
+        <h5 class="modal-title fw-bold">Deneyiminizi Paylaşın</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ url_for('customer.yorum_yap') }}" method="POST">
+          <div class="modal-body">
+            <div class="mb-3">
+                <label class="form-label">Puanınız</label>
+                <select name="puan" class="form-select border-orange text-orange fw-bold">
+                    <option value="5">⭐⭐⭐⭐⭐ - Mükemmel</option>
+                    <option value="4">⭐⭐⭐⭐ - Çok İyi</option>
+                    <option value="3">⭐⭐⭐ - Orta</option>
+                    <option value="2">⭐⭐ - Kötü</option>
+                    <option value="1">⭐ - Çok Kötü</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Yorumunuz</label>
+                <textarea name="yorum_metni" class="form-control" rows="3" placeholder="Yorumunuzu buraya yazın..." required></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-orange w-100 fw-bold">Gönder</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // tarih min ayarı
+        var today = new Date().toISOString().split('T')[0];
+        var baslangicInput = document.getElementById("baslangic");
+        var bitisInput = document.getElementById("bitis");
+
+        if(baslangicInput && bitisInput) {
+            baslangicInput.setAttribute('min', today);
+            bitisInput.setAttribute('min', today);
+
+            baslangicInput.addEventListener("change", function() {
+                var selectedDate = this.value;
+                bitisInput.setAttribute('min', selectedDate);
+                if(bitisInput.value && bitisInput.value < selectedDate) {
+                    bitisInput.value = selectedDate;
+                }
+            });
+        }
+    });
+
+    function toggleFavori(aracId, btn) {
+        fetch(`/toggle-favori/${aracId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
+        .then(r => { if(r.status===401) window.location.href="/login"; return r.json() })
+        .then(d => {
+            if(d.status==='success') {
+                const i = btn.querySelector('i');
+                if (d.action === 'added') {
+                    i.classList.remove('far', 'text-white');
+                    i.classList.add('fas', 'text-orange');
+                    const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1500, timerProgressBar: true });
+                    Toast.fire({ icon: 'success', title: 'Favorilere eklendi' });
+                } else {
+                    i.classList.remove('fas', 'text-orange');
+                    i.classList.add('far', 'text-white');
+                }
+            }
+        });
+    }
+
+    var currentMarker = null;
+</script>
+
+{% endblock %}

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Yolingo | Araç Kiralama{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* TURUNCU TEMA RENKLERİ */
+            --yolingo-orange: #f97316;
+            --yolingo-orange-dark: #ea580c;
+
+            --blue-950: #0b1228;
+            --blue-900: #0b1b3a;
+            --blue-850: #0c2148;
+            --blue-800: #0f2a5c;
+            --blue-700: #1d4ed8;
+
+            --nav-grad-1: var(--blue-950);
+            --nav-grad-2: var(--blue-800);
+        }
+
+        body {
+            background: #f3f4f6;
+            font-family: 'Montserrat', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: 80px;
+        }
+
+        .footer {
+            margin-top: auto;
+        }
+
+        /* --- PRELOADER (YENİ ÇUBUKLU ANİMASYON) --- */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity .4s ease;
+        }
+
+        .loader-wheel {
+            width: 80px;
+            height: 80px;
+            position: relative;
+        }
+
+        .loader-spokes {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 60px;
+            width: 60px;
+            margin: -30px 0 0 -30px;
+            animation: spin 1s steps(12, end) infinite;
+        }
+
+        .loader-spokes::before,
+        .loader-spokes::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 25px;
+            width: 10px;
+            height: 20px;
+            border-radius: 5px;
+            background: var(--blue-950);
+            box-shadow: 0 40px var(--blue-950);
+            transform-origin: 50% 30px;
+        }
+
+        .loader-spokes::before {
+            transform: rotate(0deg);
+        }
+
+        .loader-spokes::after {
+            transform: rotate(45deg);
+        }
+
+        /* Diğer 2 çubuk grubunu oluşturmak için bir tane daha ekliyoruz */
+        .loader-spokes-2 {
+            transform: rotate(90deg);
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* NAVBAR */
+        .navbar-custom {
+            background: linear-gradient(90deg, var(--nav-grad-1), var(--nav-grad-2));
+            border-bottom: 3px solid var(--yolingo-orange);
+            padding: 14px 0;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+            color: #fff !important;
+            text-transform: uppercase;
+        }
+
+        .nav-link {
+            font-weight: 600;
+            color: #e5e7eb !important;
+            margin: 0 10px;
+            position: relative;
+            transition: color .25s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--yolingo-orange) !important;
+        }
+
+        .nav-link:not(.user-profile-btn)::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: var(--yolingo-orange);
+            transition: width .25s ease;
+        }
+
+        .nav-link:not(.user-profile-btn):hover::after {
+            width: 100%;
+        }
+
+        /* AUTH BUTTONS */
+        .btn-login {
+            background: var(--yolingo-orange);
+            border-color: var(--yolingo-orange);
+            color: #fff !important;
+            font-weight: 800;
+            border-radius: 999px;
+            padding: 8px 20px;
+            transition: all 0.3s;
+        }
+
+        .btn-login:hover {
+            background: var(--yolingo-orange-dark);
+            border-color: var(--yolingo-orange-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-register {
+            background: var(--blue-700);
+            border-color: var(--blue-700);
+            color: #fff !important;
+            font-weight: 800;
+            border-radius: 999px;
+            padding: 8px 20px;
+        }
+
+        .btn-register:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        /* PROFIL BUTONU */
+        .user-profile-btn {
+            background: rgba(11, 18, 40, .35);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            position: relative;
+            overflow: hidden;
+            transition: all .25s ease;
+        }
+
+        .user-profile-btn:hover {
+            border-color: var(--yolingo-orange);
+            color: #fff !important;
+        }
+
+        .user-profile-btn::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: var(--yolingo-orange);
+            transition: width .35s cubic-bezier(.25, .8, .25, 1);
+            z-index: 1;
+        }
+
+        .user-profile-btn:hover::before {
+            width: 100%;
+        }
+
+        /* DROPDOWN */
+        .dropdown-menu-dark-custom {
+            background: linear-gradient(180deg, var(--blue-950), var(--blue-850));
+            border: 1px solid var(--yolingo-orange);
+            margin-top: 10px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, .35);
+        }
+
+        .dropdown-item {
+            color: #fff;
+            transition: .2s;
+        }
+
+        .dropdown-item:hover {
+            background: var(--yolingo-orange);
+            color: #fff;
+            padding-left: 1.5rem;
+        }
+
+        /* KART EFEKTLERI */
+        .card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+            border-color: var(--yolingo-orange) !important;
+            z-index: 10;
+        }
+
+        /* FOOTER */
+        footer {
+            background: linear-gradient(90deg, var(--blue-950), var(--blue-900)) !important;
+            border-top: 3px solid var(--yolingo-orange);
+        }
+    </style>
+</head>
+
+<body>
+
+    {% include 'partials/_preloader.html' %}
+    {% include 'partials/_navbar.html' %}
+
+    <div class="container mt-4 mb-5">
+        {% block body %}{% endblock %}
+        {% block content %}{% endblock %}
+    </div>
+
+    {% include 'partials/_footer.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Preloader
+        window.addEventListener("load", function () {
+            var loader = document.getElementById("preloader");
+            if (loader) {
+                loader.style.opacity = "0";
+                setTimeout(function () { loader.style.display = "none"; }, 500);
+            }
+        });
+
+        // Form Submit Animasyonu (Sayfa geçişlerinde tekrar loading göstermek için)
+        document.addEventListener('submit', function (e) {
+            if (e.target.tagName === 'FORM') {
+                var loader = document.getElementById("preloader");
+                if (loader) {
+                    loader.style.display = "flex";
+                    // Kısa bir gecikmeyle opacity artır ki transition çalışsın
+                    setTimeout(() => { loader.style.opacity = "1"; }, 10);
+                }
+            }
+        });
+
+        // SweetAlert Ayarları (Turuncu Tema ile)
+        {% with messages = get_flashed_messages(with_categories = true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        var iconType = 'info';
+        if ("{{ category }}" == "success") iconType = 'success';
+        else if ("{{ category }}" == "danger") iconType = 'error';
+        else if ("{{ category }}" == "warning") iconType = 'warning';
+
+        Swal.fire({
+            title: "{{ message }}",
+            icon: iconType,
+            confirmButtonText: 'Tamam',
+            confirmButtonColor: '#f97316', // Turuncu
+            background: '#0b1228', // Koyu Mavi
+            color: '#fff',
+            timer: 3000,
+            timerProgressBar: true
+        });
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,127 @@
+{% extends "layout.html" %}
+
+{% block title %}Sigorta Düzenle | Yolingo{% endblock %}
+
+{% block content %}
+<style>
+    /* TEMA RENKLERİ */
+    :root {
+        --yolingo-dark: #0b1228;
+        --yolingo-orange: #f97316;
+        --yolingo-orange-hover: #ea580c;
+    }
+
+    /* KART TASARIMI */
+    .card-header-custom {
+        background-color: var(--yolingo-dark);
+        color: white;
+        border-bottom: 3px solid var(--yolingo-orange);
+    }
+
+    /* FORM ELEMANLARI */
+    .form-control:focus {
+        border-color: var(--yolingo-orange);
+        box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.25);
+    }
+    
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #6c757d; /* Secondary text color */
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* BUTONLAR */
+    .btn-orange {
+        background-color: var(--yolingo-orange);
+        color: white;
+        border: none;
+        transition: all 0.3s;
+    }
+    .btn-orange:hover {
+        background-color: var(--yolingo-orange-hover);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-outline-custom {
+        border: 2px solid var(--yolingo-dark);
+        color: var(--yolingo-dark);
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-outline-custom:hover {
+        background-color: var(--yolingo-dark);
+        color: white;
+    }
+</style>
+
+<div class="container mt-5 mb-5" style="max-width: 800px;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0 text-dark">Sigorta Düzenle</h2>
+            <p class="text-muted small">Poliçe bilgilerini güncelleyin.</p>
+        </div>
+        <a href="{{ url_for('admin.sigortalar') }}" class="btn btn-outline-custom rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i>Listeye Dön
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-header card-header-custom py-3">
+            <h5 class="mb-0 fw-bold">
+                <i class="fas fa-edit me-2" style="color: var(--yolingo-orange);"></i>Poliçe Detayları
+            </h5>
+        </div>
+        <div class="card-body p-4 bg-white">
+            <form method="POST">
+                
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Sigorta Şirketi</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-building text-muted"></i></span>
+                            <input type="text" name="sigorta_sirketi" class="form-control border-start-0 ps-0" value="{{ sigorta.sigorta_sirketi }}" required>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Poliçe No</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="fas fa-file-invoice text-muted"></i></span>
+                            <input type="text" name="police_no" class="form-control border-start-0 ps-0" value="{{ sigorta.police_no }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Başlangıç Tarihi</label>
+                        <input type="date" name="baslangic_tarihi" class="form-control" value="{{ sigorta.baslangic_tarihi }}" required>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <label class="form-label">Bitiş Tarihi</label>
+                        <input type="date" name="bitis_tarihi" class="form-control" value="{{ sigorta.bitis_tarihi }}" required>
+                    </div>
+                </div>
+
+                <hr class="text-muted opacity-25 mb-4">
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('admin.sigortalar') }}" class="btn btn-light rounded-pill px-4 fw-bold text-secondary">
+                        Vazgeç
+                    </a>
+                    <button type="submit" class="btn btn-orange rounded-pill px-5 fw-bold">
+                        <i class="fas fa-save me-2"></i>Değişiklikleri Kaydet
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

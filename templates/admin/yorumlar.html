@@ -1,0 +1,280 @@
+{% extends "layout.html" %}
+{% block title %}Yorum Yönetimi{% endblock %}
+
+{% block body %}
+<style>
+    :root {
+        --yolingo-dark: #0b1228;
+        --yolingo-orange: #f97316;       /* Ana Turuncu */
+        --yolingo-orange-dark: #c2410c;  /* Koyu Turuncu (Hover için) */
+        --yolingo-light-bg: #fff7ed;     /* Çok açık turuncu zemin */
+        --text-dark: #1e293b;
+        --text-muted: #64748b;
+    }
+
+    /* Kart Yapısı */
+    .card-custom {
+        border: none;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(249, 115, 22, 0.08); /* Hafif turuncu gölge */
+        background: #fff;
+    }
+
+    /* Tablo Başlığı - TURUNCU TEMA */
+    .table-header-custom th {
+        background: linear-gradient(135deg, var(--yolingo-orange) 0%, var(--yolingo-orange-dark) 100%);
+        color: white;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.8px;
+        padding: 18px 20px;
+        border: none;
+    }
+    
+    /* İlk ve son köşeleri yuvarlatma */
+    .table-header-custom th:first-child { border-top-left-radius: 16px; }
+    .table-header-custom th:last-child { border-top-right-radius: 16px; }
+
+    /* Tablo Satırları */
+    .table tbody td {
+        padding: 20px;
+        vertical-align: middle;
+        border-bottom: 1px solid #fed7aa; /* Çok silik turuncu çizgi */
+        color: var(--text-dark);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: var(--yolingo-light-bg);
+        transition: background-color 0.2s ease;
+    }
+
+    /* Müşteri Avatarı */
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        background: white;
+        border: 2px solid var(--yolingo-orange);
+        color: var(--yolingo-orange);
+        font-weight: 800;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        box-shadow: 0 2px 5px rgba(249, 115, 22, 0.15);
+    }
+
+    /* Yorum Kutusu */
+    .comment-bubble {
+        background-color: #fff;
+        border: 1px solid #fed7aa; /* Turuncu sınır */
+        border-left: 4px solid var(--yolingo-orange);
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        color: #334155;
+        font-style: italic;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    }
+
+    /* "Panele Dön" Butonu */
+    .btn-yolingo-outline {
+        border: 2px solid var(--yolingo-orange);
+        color: var(--yolingo-orange);
+        font-weight: 700;
+        background: transparent;
+        transition: all 0.3s;
+    }
+    .btn-yolingo-outline:hover {
+        background: var(--yolingo-orange);
+        color: white;
+        box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    }
+
+    /* Durum Rozetleri */
+    .badge-soft {
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.75rem;
+    }
+    .badge-soft-warning { background-color: #fff7ed; color: #c2410c; border: 1px solid #fdba74; } /* Turuncu tonlu bekleme */
+    .badge-soft-success { background-color: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+    .badge-soft-danger  { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+    /* Aksiyon Butonları */
+    .btn-action {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-action-approve { background-color: #dcfce7; color: #166534; }
+    .btn-action-approve:hover { background-color: #166534; color: white; transform: translateY(-2px); }
+
+    .btn-action-reject { background-color: #f1f5f9; color: #64748b; }
+    .btn-action-reject:hover { background-color: #64748b; color: white; transform: translateY(-2px); }
+
+    .btn-action-delete { background-color: #fee2e2; color: #991b1b; }
+    .btn-action-delete:hover { background-color: #991b1b; color: white; transform: translateY(-2px); }
+
+</style>
+
+<div class="container-fluid py-4 px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--yolingo-dark);">
+                <i class="fas fa-comments me-2" style="color: var(--yolingo-orange);"></i>Yorum Yönetimi
+            </h2>
+            <p class="text-muted small mb-0">
+                Toplam <span class="fw-bold" style="color: var(--yolingo-orange);">{{ yorumlar|length }}</span> adet yorum listeleniyor.
+            </p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-yolingo-outline rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i>Panele Dön
+        </a>
+    </div>
+
+    <div class="card card-custom">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-header-custom">
+                        <tr>
+                            <th class="ps-4">Müşteri Bilgisi</th>
+                            <th style="width: 35%;">Yorum İçeriği</th>
+                            <th class="text-center">Puan</th>
+                            <th class="text-center">Durum</th>
+                            <th>İşlem Yapan</th>
+                            <th class="text-end pe-4">Yönetim</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for yorum in yorumlar %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-3">
+                                        {{ yorum.ad[0] }}{{ yorum.soyad[0] }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">{{ yorum.ad }} {{ yorum.soyad }}</div>
+                                        <div class="text-muted small" style="font-size: 0.75rem;">
+                                            <i class="far fa-calendar-alt me-1 text-warning"></i> {{ yorum.tarih }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="comment-bubble">
+                                    "{{ yorum.yorum_metni }}"
+                                </div>
+                            </td>
+
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center" style="color: #fbbf24;"> {% for i in range(yorum.puan) %}
+                                        <i class="fas fa-star"></i>
+                                    {% endfor %}
+                                    {% for i in range(5 - yorum.puan) %}
+                                        <i class="far fa-star text-muted opacity-25"></i>
+                                    {% endfor %}
+                                </div>
+                                <span class="fw-bold small" style="color: var(--yolingo-dark);">{{ yorum.puan }}.0</span>
+                            </td>
+
+                            <td class="text-center">
+                                {% if yorum.durum == 'Bekliyor' %}
+                                    <span class="badge badge-soft badge-soft-warning">
+                                        <i class="fas fa-hourglass-half me-1"></i> Bekliyor
+                                    </span>
+                                {% elif yorum.durum == 'Reddedildi' %}
+                                    <span class="badge badge-soft badge-soft-danger">
+                                        <i class="fas fa-ban me-1"></i> Reddedildi
+                                    </span>
+                                {% else %}
+                                    <span class="badge badge-soft badge-soft-success">
+                                        <i class="fas fa-check-circle me-1"></i> Yayında
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if yorum.admin_ad %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded p-2 me-2 border" style="color: var(--yolingo-orange);">
+                                            <i class="fas fa-user-check"></i>
+                                        </div>
+                                        <div>
+                                            <span class="d-block fw-bold" style="color: var(--yolingo-dark); font-size: 0.8rem;">
+                                                {{ yorum.admin_ad }} {{ yorum.admin_soyad }}
+                                            </span>
+                                            {% if yorum.islem_tarihi %}
+                                                <small class="text-muted" style="font-size: 0.7rem;">
+                                                    {{ yorum.islem_tarihi }}
+                                                </small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span class="text-muted small opacity-50 fst-italic">- İşlem Yok -</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-end pe-4">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    {% if yorum.durum == 'Bekliyor' %}
+                                        <a href="{{ url_for('admin.yorum_islem', yorum_id=yorum.yorum_id, islem='onayla') }}" 
+                                           class="btn-action btn-action-approve"
+                                           data-bs-toggle="tooltip" title="Onayla">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        <a href="{{ url_for('admin.yorum_islem', yorum_id=yorum.yorum_id, islem='reddet') }}" 
+                                            class="btn-action btn-action-reject"
+                                            data-bs-toggle="tooltip" title="Reddet">
+                                             <i class="fas fa-times"></i>
+                                         </a>
+                                    {% endif %}
+                                    
+                                    <div class="vr mx-1 opacity-25"></div>
+
+                                    <a href="{{ url_for('admin.yorum_islem', yorum_id=yorum.yorum_id, islem='sil') }}" 
+                                       class="btn-action btn-action-delete"
+                                       onclick="return confirm('Bu kaydı tamamen silmek istediğine emin misin?')"
+                                       data-bs-toggle="tooltip" title="Kalıcı Olarak Sil">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted opacity-50">
+                                    <i class="far fa-comment-dots fa-4x mb-3" style="color: var(--yolingo-orange);"></i>
+                                    <h5 class="fw-normal">Henüz gösterilecek bir yorum yok.</h5>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+
+{% endblock %}

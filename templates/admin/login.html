@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+
+{% block title %}Personel Girişi - Araç Kiralama{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-dark text-white text-center py-3">
+                <h4 class="mb-0"><i class="fas fa-user-shield me-2"></i>Personel Girişi</h4>
+            </div>
+            <div class="card-body p-4 bg-light">
+
+                <form action="{{ url_for('auth.admin_login') }}" method="POST">
+
+                    <div class="mb-3">
+                        <label for="eposta" class="form-label fw-bold text-secondary">Kurumsal E-Posta</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fas fa-envelope text-muted"></i></span>
+                            <input type="email" class="form-control" id="eposta" name="eposta"
+                                placeholder="ornek@sirket.com" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="sifre" class="form-label fw-bold text-secondary">Şifre</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fas fa-lock text-muted"></i></span>
+                            <input type="password" class="form-control" id="sifre" name="sifre" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-dark btn-lg">
+                            <i class="fas fa-sign-in-alt me-1"></i> Sisteme Giriş Yap
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+            <div class="card-footer text-center bg-white py-3">
+                <small class="text-muted">Sadece yetkili personel içindir.</small>
+                <br>
+                <a href="{{ url_for('index') }}" class="text-decoration-none small text-secondary">← Ana Sayfaya Dön</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,173 @@
+{% extends "layout.html" %}
+
+{% block title %}Sigorta Takip Listesi - Yönetici{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --yolingo-orange: #f97316;        /* Ana Turuncu */
+        --yolingo-orange-dark: #c2410c;   /* Koyu Turuncu (Hover/Başlık) */
+        --yolingo-orange-light: #fff7ed;  /* Çok Açık Turuncu (Arkaplanlar) */
+        --yolingo-danger-orange: #ef4444; /* Kırmızımsı Turuncu (Tehlike) */
+        --yolingo-warning-orange: #fb923c; /* Sarımsı Turuncu (Uyarı) */
+    }
+
+    /* Başlık İkonu */
+    .text-orange-theme { color: var(--yolingo-orange); }
+
+    /* Panele Dön Butonu (Outline) */
+    .btn-outline-orange {
+        border: 2px solid var(--yolingo-orange);
+        color: var(--yolingo-orange);
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-outline-orange:hover {
+        background-color: var(--yolingo-orange);
+        color: white;
+    }
+
+    /* Tablo Başlığı */
+    .bg-orange-header {
+        background-color: var(--yolingo-orange-dark) !important;
+        color: white !important;
+    }
+
+    /* Tablo Satır Uyarıları (Turuncu Tonları) */
+    .table-orange-warning {
+        background-color: #fff3e0 !important; /* Açık turuncu/sarı */
+    }
+    .table-orange-danger {
+        background-color: #fee2e2 !important; /* Açık kırmızı/turuncu */
+    }
+    
+    /* Metin Vurguları */
+    .text-orange-primary { color: var(--yolingo-orange-dark) !important; }
+    .text-orange-danger { color: var(--yolingo-danger-orange) !important; }
+
+    /* Rozetler (Badges) */
+    .badge-orange-warning { background-color: var(--yolingo-warning-orange); color: white; }
+    .badge-orange-danger { background-color: var(--yolingo-danger-orange); color: white; }
+
+    /* Güncelle Butonu (Dolu) */
+    .btn-orange-action {
+        background-color: var(--yolingo-orange);
+        border: none;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    .btn-orange-action:hover {
+        background-color: var(--yolingo-orange-dark);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(249, 115, 22, 0.2);
+    }
+</style>
+
+<div class="container-fluid mt-4 mb-5 px-4">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0 fw-bold"><i class="fas fa-file-contract me-2 text-orange-theme"></i>Sigorta Yönetimi</h2>
+            <p class="text-muted mb-0">Filodaki tüm araçların sigorta poliçe detayları.</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-orange rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i>Panele Dön
+        </a>
+    </div>
+
+    <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-orange-header text-uppercase small fw-bold">
+                        <tr>
+                            <th class="py-3 ps-4">Durum</th>
+                            <th class="py-3">Araç Bilgisi</th>
+                            <th class="py-3">Plaka</th>
+                            <th class="py-3">Sigorta Şirketi</th>
+                            <th class="py-3">Poliçe No</th>
+                            <th class="py-3">Başlangıç / Bitiş</th>
+                            <th class="py-3 text-center">Kalan Gün</th>
+                            <th class="py-3 text-end pe-4">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if sigortalar %}
+                            {% for sigorta in sigortalar %}
+                            
+                            {% set row_class = '' %}
+                            {% if sigorta.kalan_gun < 0 %}
+                                {% set row_class = 'table-orange-danger' %} 
+                            {% elif sigorta.kalan_gun <= 30 %}
+                                {% set row_class = 'table-orange-warning' %} 
+                            {% endif %}
+
+                            <tr class="{{ row_class }}" style="border-bottom: 1px solid #ffead6;">
+                                <td class="ps-4">
+                                    {% if sigorta.kalan_gun < 0 %}
+                                        <span class="badge badge-orange-danger rounded-pill px-3 py-2">SÜRESİ DOLDU</span>
+                                    {% elif sigorta.kalan_gun <= 30 %}
+                                        <span class="badge badge-orange-warning rounded-pill px-3 py-2">YENİLE</span>
+                                    {% else %}
+                                        <span class="badge bg-success rounded-pill px-3 py-2">AKTİF</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if sigorta.marka %}
+                                        <div class="fw-bold text-dark">
+                                            <i class="fas fa-car me-1 text-muted small"></i>
+                                            {{ sigorta.marka }} {{ sigorta.model }}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted fst-italic small">Araçsız Poliçe</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if sigorta.plaka %}
+                                        <span class="fw-bold text-dark bg-orange-light px-2 py-1 rounded border border-orange-light small">
+                                            {{ sigorta.plaka }}
+                                        </span>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-orange-primary">{{ sigorta.sigorta_sirketi }}</td>
+                                <td><small class="text-muted fw-bold font-monospace">{{ sigorta.police_no }}</small></td>
+                                <td>
+                                    <div class="small text-muted"><i class="far fa-calendar-alt me-1"></i>{{ sigorta.baslangic_tarihi }}</div>
+                                    <div class="small fw-bold text-dark"><i class="far fa-calendar-check me-1 text-orange-theme"></i>{{ sigorta.bitis_tarihi }}</div>
+                                </td>
+                                <td class="text-center">
+                                    {% if sigorta.kalan_gun < 0 %}
+                                        <strong class="text-orange-danger">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>{{ sigorta.kalan_gun * -1 }} gün geçti
+                                        </strong>
+                                    {% elif sigorta.kalan_gun <= 30 %}
+                                        <strong class="text-orange-primary">
+                                            <i class="fas fa-hourglass-half me-1"></i>{{ sigorta.kalan_gun }} gün
+                                        </strong>
+                                    {% else %}
+                                        <span class="text-success fw-bold">
+                                            {{ sigorta.kalan_gun }} gün
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="{{ url_for('admin.sigorta_guncelle', sigorta_id=sigorta.sigorta_id) }}" class="btn btn-sm btn-orange-action rounded-pill px-3 shadow-sm">
+                                        <i class="fas fa-edit me-1"></i> Güncelle
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="8" class="text-center py-5 text-muted fw-bold">Kayıtlı sigorta bilgisi bulunamadı.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

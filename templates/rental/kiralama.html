@@ -1,0 +1,258 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div class="page-bg">
+    <div class="container py-3 mt-2">
+
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-uppercase text-dark" style="letter-spacing:2px;">
+                <i class="fas fa-calendar-check text-warning me-2"></i>
+                KİRALAMA REZERVASYONU TAMAMLA
+            </h2>
+            <div class="alert alert-warning mt-3 d-flex align-items-center justify-content-center py-2">
+                <i class="fas fa-info-circle fs-5 me-2"></i>
+                <span><strong>Bilgilendirme:</strong>&nbsp;Ödeme tamamlandığında aracınız sizin adınıza rezerve edilir.</span>
+            </div>
+        </div>
+
+        <form action="{{ url_for('rental.kiralama', arac_id=arac.arac_id) }}" method="POST" id="kiralamaForm">
+
+            <div class="row g-4">
+                
+                <div class="col-lg-4">
+                    <div class="card bg-dark text-white border-warning shadow-lg h-100">
+                        <div class="position-relative">
+                            <img src="{{ url_for('static', filename='img/' + arac.resim_url) }}" class="card-img-top p-2 rounded-4">
+                            <span class="position-absolute top-0 end-0 m-3 badge bg-warning text-dark fw-bold fs-6">
+                                {{ arac.gunluk_ucret }} TL / Gün
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <h3 class="text-warning fw-bold text-center mb-3">{{ arac.marka }} {{ arac.model }}</h3>
+                            <div class="row g-2 text-center small mb-3">
+                                <div class="col-6 bg-secondary bg-opacity-10 py-2 rounded">
+                                    <i class="fas fa-gas-pump text-warning"></i><br>{{ arac.yakit_turu }}
+                                </div>
+                                <div class="col-6 bg-secondary bg-opacity-10 py-2 rounded">
+                                    <i class="fas fa-cogs text-warning"></i><br>{{ arac.vites_turu }}
+                                </div>
+                                <div class="col-6 bg-secondary bg-opacity-10 py-2 rounded">
+                                    <i class="fas fa-calendar text-warning"></i><br>{{ arac.yil }}
+                                </div>
+                                <div class="col-6 bg-secondary bg-opacity-10 py-2 rounded">
+                                    <i class="fas fa-tachometer-alt text-warning"></i><br>{{ arac.kilometre }} km
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card shadow-sm h-100 border-0">
+                        <div class="card-header bg-dark text-warning fw-bold">
+                            <i class="fas fa-shield-alt me-2"></i>Hizmet Detayları
+                        </div>
+
+                        <div class="card-body bg-white">
+                            
+                            <div class="mb-4">
+                                <label class="fw-bold small text-muted mb-3 d-block border-bottom pb-2">SİGORTA PAKETİ</label>
+                                
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input fs-5" type="radio" name="sigorta_paket_id" id="sigorta1" value="1" data-price="0" checked>
+                                    <label class="form-check-label w-100 ms-2 cursor-pointer" for="sigorta1">
+                                        <div class="d-flex justify-content-between fw-bold text-dark">
+                                            <span>Temel Sigorta</span>
+                                            <span class="text-success">Ücretsiz</span>
+                                        </div>
+                                        <small class="text-muted">Zorunlu Trafik Sigortası</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input fs-5" type="radio" name="sigorta_paket_id" id="sigorta2" value="2" data-price="500">
+                                    <label class="form-check-label w-100 ms-2 cursor-pointer" for="sigorta2">
+                                        <div class="d-flex justify-content-between fw-bold text-dark">
+                                            <span>Mini Hasar Paketi</span>
+                                            <span class="text-warning">+500 TL</span>
+                                        </div>
+                                        <small class="text-muted">Lastik, Cam, Far Güvencesi</small>
+                                    </label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input fs-5" type="radio" name="sigorta_paket_id" id="sigorta3" value="3" data-price="1000">
+                                    <label class="form-check-label w-100 ms-2 cursor-pointer" for="sigorta3">
+                                        <div class="d-flex justify-content-between fw-bold text-dark">
+                                            <span>Tam Kapsamlı (Kasko)</span>
+                                            <span class="text-danger">+1000 TL</span>
+                                        </div>
+                                        <small class="text-muted">%100 Güvence, 0 Muafiyet</small>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="fw-bold small text-muted mb-1">ALIŞ TARİHİ</label>
+                                        <input type="date" class="form-control bg-light border-0" name="baslangic_tarihi" id="baslangic" value="{{ url_baslangic if url_baslangic else '' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="fw-bold small text-muted mb-1">SAAT</label>
+                                        <select name="alis_saati" class="form-select bg-light border-0" required>
+                                            <option value="09:00">09:00</option>
+                                            <option value="12:00">12:00</option>
+                                            <option value="15:00">15:00</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="fw-bold small text-muted mb-1">İADE TARİHİ</label>
+                                        <input type="date" class="form-control bg-light border-0" name="bitis_tarihi" id="bitis" value="{{ url_bitis if url_bitis else '' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-0">
+                                        <label class="fw-bold small text-muted mb-1">SAAT</label>
+                                        <select name="teslim_saati" class="form-select bg-light border-0" required>
+                                            <option value="09:00">09:00</option>
+                                            <option value="12:00">12:00</option>
+                                            <option value="15:00">15:00</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card bg-dark text-white shadow-lg sticky-top" style="top:100px;">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-warning mb-3">
+                                <i class="fas fa-receipt me-2"></i>Ödeme Özeti
+                            </h5>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Gün Sayısı</span>
+                                <span id="ozetGun">0 Gün</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Araç Bedeli</span>
+                                <span id="ozetArac">0 TL</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Sigorta Bedeli</span>
+                                <span id="ozetEkstra" class="text-warning">0 TL</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between fs-5 fw-bold">
+                                <span>TOPLAM</span>
+                                <span id="toplamUcret">0 TL</span>
+                            </div>
+                            <button type="submit" class="btn btn-warning w-100 fw-bold mt-4 py-3 fs-5">
+                                ÖDEMEYE GEÇ <i class="fas fa-arrow-right ms-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.page-bg{ background:#f3f4f6; min-height:100vh; padding-bottom:40px; }
+:root{ --yolingo-orange:#f97316; --yolingo-orange-dark:#ea580c; }
+.text-warning{ color:var(--yolingo-orange)!important; }
+.bg-warning{ background:var(--yolingo-orange)!important; color:#111!important; }
+.border-warning{ border-color:var(--yolingo-orange)!important; }
+.btn-warning{ background:var(--yolingo-orange)!important; border-color:var(--yolingo-orange)!important; color:#fff!important; }
+.btn-warning:hover{ background:var(--yolingo-orange-dark)!important; border-color:var(--yolingo-orange-dark)!important; }
+.cursor-pointer { cursor: pointer; }
+.form-check-input:checked { background-color: var(--yolingo-orange); border-color: var(--yolingo-orange); }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const today = new Date().toISOString().split('T')[0];
+    const baslangicInput = document.getElementById('baslangic');
+    const bitisInput = document.getElementById('bitis');
+    
+    baslangicInput.min = today;
+    bitisInput.min = today;
+
+    // Tüm inputları (tarih ve radio butonları) dinle
+    const inputs = document.querySelectorAll(
+        '#baslangic, #bitis, input[name="sigorta_paket_id"]'
+    );
+
+    inputs.forEach(el => {
+        el.addEventListener('change', hesapla);
+        el.addEventListener('input', hesapla);
+    });
+
+    hesapla();
+});
+
+function formatMoney(amount){
+    return amount.toLocaleString('tr-TR') + " TL";
+}
+
+function hesapla(){
+    // Jinja değişkeni JS içinde kullanılıyor
+    const gunlukAracUcreti = {{ arac.gunluk_ucret }};
+    
+    const baslangic = document.getElementById('baslangic').value;
+    const bitis = document.getElementById('bitis').value;
+    
+    let gunlukSigortaUcreti = 0;
+    const secilenSigorta = document.querySelector('input[name="sigorta_paket_id"]:checked');
+
+    if(secilenSigorta){
+        // HTML'de data-price özelliği eklediğimiz için artık bu çalışır
+        gunlukSigortaUcreti = parseInt(secilenSigorta.dataset.price);
+    }
+
+    let gun = 0;
+    let toplamArac = 0;
+    let toplamSigorta = 0;
+
+    if(baslangic && bitis){
+        const d1 = new Date(baslangic);
+        const d2 = new Date(bitis);
+        // Zaman farkını gün farkına çevir
+        const diffTime = d2 - d1; 
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+        
+        // Eğer tarihler geçerliyse ve bitiş başlangıçtan sonra/eşitse
+        if (diffDays >= 0) {
+            // Eğer aynı gün seçilirse en az 1 gün sayar, yoksa farkı alır
+            gun = diffDays === 0 ? 1 : diffDays;
+        } else {
+            gun = 0; // Geçersiz tarih aralığı
+        }
+    }
+
+    if(gun > 0){
+        toplamArac = gun * gunlukAracUcreti;
+        toplamSigorta = gun * gunlukSigortaUcreti;
+    }
+
+    // HTML Elemanlarını Güncelle
+    document.getElementById('ozetGun').innerText = gun + " Gün";
+    document.getElementById('ozetArac').innerText = formatMoney(toplamArac);
+    document.getElementById('ozetEkstra').innerText = formatMoney(toplamSigorta);
+    document.getElementById('toplamUcret').innerText = formatMoney(toplamArac + toplamSigorta);
+}
+</script>
+
+{% endblock %}

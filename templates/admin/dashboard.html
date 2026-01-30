@@ -1,0 +1,553 @@
+{% extends "layout.html" %}
+
+{% block title %}Yönetici Paneli | Yolingo{% endblock %}
+
+{% block body %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(90deg, #0b1228 0%, #0f2a5c 100%);
+        --yolingo-orange: #f97316;
+        --yolingo-orange-dark: #ea580c;
+        --card-hover-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        --text-secondary: #64748b;
+    }
+
+    body { background-color: #f8fafc; }
+
+    /* DASHBOARD HEADER */
+    .dashboard-header {
+        margin-top: -1.5rem; padding-top: 2.5rem; padding-bottom: 5rem; margin-bottom: -4rem;
+        width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+        background: var(--primary-gradient); color: white; border-radius: 0 0 50px 50px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        padding-left: max(2rem, calc(50vw - 660px)); padding-right: max(2rem, calc(50vw - 660px));
+        position: relative; overflow: hidden;
+    }
+    .dashboard-header::before {
+        content: ''; position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+        background-image: radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 20%),
+                          radial-gradient(circle at 90% 80%, rgba(249, 115, 22, 0.1) 0%, transparent 25%);
+        pointer-events: none;
+    }
+
+    /* KARTLAR */
+    .stat-card, .brand-card {
+        background: white; border-radius: 20px; border: none;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03); transition: all 0.3s ease;
+        position: relative; overflow: hidden;
+    }
+    .stat-card { height: 100%; }
+    .stat-card:hover, .brand-card:hover { transform: translateY(-5px); box-shadow: var(--card-hover-shadow); }
+    
+    .stat-card::after, .brand-card::after {
+        content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px;
+        background: var(--yolingo-orange); opacity: 0; transition: opacity 0.3s;
+    }
+    .stat-card:hover::after, .brand-card:hover::after { opacity: 1; }
+
+    .icon-box {
+        width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
+        border-radius: 16px; font-size: 1.4rem; transition: transform 0.3s;
+    }
+    .stat-card:hover .icon-box { transform: scale(1.1) rotate(5deg); }
+
+    /* CONTENT & TABLO */
+    .content-card { background: white; border-radius: 20px; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.04); height: 100%; }
+    .table-custom thead th {
+        background-color: #f1f5f9; color: var(--text-secondary); font-weight: 700;
+        font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8px;
+        border-bottom: none; padding: 1rem;
+    }
+    .table-custom tbody td { padding: 1rem; vertical-align: middle; }
+
+    /* RENKLİ SIRA ROZETLERİ */
+    .rank-badge-lg {
+        width: 32px; height: 32px; border-radius: 50%; display: flex;
+        align-items: center; justify-content: center; font-size: 1rem; font-weight: bold;
+        color: white; background: #cbd5e1; margin-bottom: 0.5rem;
+    }
+    .rank-1 { background: linear-gradient(135deg, #FFD700, #FDB931); box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3); }
+    .rank-2 { background: linear-gradient(135deg, #E0E0E0, #BDBDBD); }
+    .rank-3 { background: linear-gradient(135deg, #CD7F32, #A0522D); }
+
+    /* BADGE DÜZELTMESİ */
+    .badge-soft-primary { background-color: #dbeafe !important; color: #1e40af !important; font-weight: 700; }
+    .badge-soft-success { background-color: #dcfce7 !important; color: #166534 !important; font-weight: 700; }
+    .badge-soft-warning { background-color: #ffedd5 !important; color: #9a3412 !important; font-weight: 700; }
+
+    /* BUTONLAR */
+    .action-btn {
+        background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+        color: white; backdrop-filter: blur(10px); transition: all 0.3s; font-weight: 500;
+    }
+    .action-btn:hover { background: white; color: #0b1228; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    
+    .btn-orange-glow {
+        background: var(--yolingo-orange); color: white; border: none;
+        box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4); transition: all 0.3s;
+    }
+    .btn-orange-glow:hover { background: var(--yolingo-orange-dark); color: white; transform: translateY(-2px); }
+
+    .clickable-card { cursor: pointer; }
+    .clickable-card:active { transform: scale(0.98); }
+</style>
+
+<div class="dashboard-header">
+    <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-4 position-relative z-1">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-warning text-dark fw-bold px-2">
+                    {{ session.get('gorev', 'PERSONEL') | upper }}
+                </span>
+                <span class="text-white-50 small text-uppercase ls-1">Yönetim Paneli</span>
+            </div>
+            <h1 class="fw-bold mb-0 display-6">Hoşgeldin, {{ session['ad'] }} 👋</h1>
+            <p class="text-white-50 mb-0 mt-1">Sistem durumu ve özet raporlar aşağıdadır.</p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('admin.database') }}" class="btn action-btn rounded-pill px-3"><i class="fas fa-database me-2"></i>DB Master</a>
+            <a href="{{ url_for('admin.takvim') }}" class="btn action-btn rounded-pill px-3"><i class="fas fa-calendar-alt me-2"></i>Takvim</a>
+            <a href="{{ url_for('admin.yorumlar') }}" class="btn action-btn rounded-pill px-3"><i class="fas fa-comments me-2"></i>Yorumlar</a>
+            <a href="{{ url_for('admin.bakim') }}" class="btn action-btn rounded-pill px-3"><i class="fas fa-tools me-2"></i>Bakım</a>
+            <a href="{{ url_for('admin.sigortalar') }}" class="btn action-btn rounded-pill px-3"><i class="fas fa-file-contract me-2"></i>Sigorta Durumu</a>
+            <a href="{{ url_for('admin.arac_ekle') }}" class="btn btn-orange-glow fw-bold rounded-pill px-4 ms-2"><i class="fas fa-plus me-2"></i>Araç Ekle</a>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid px-4 pb-5" style="margin-top: -3rem; position: relative; z-index: 2;">
+    
+    <div class="row g-3 mb-4 justify-content-center">
+        <div class="col-lg-4 col-md-6">
+            <div class="stat-card p-4 d-flex align-items-center justify-content-between clickable-card" 
+                 data-bs-toggle="modal" data-bs-target="#ciroModal" title="Detaylar için tıklayın">
+                <div style="min-width: 0;">
+                    <div class="d-flex align-items-center mb-1">
+                        <span class="text-secondary small fw-bold text-uppercase me-2">Net Ciro</span>
+                        <span class="badge bg-light text-secondary rounded-pill" style="font-size: 0.65rem;"><i class="fas fa-search-plus"></i> Detay</span>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-0 text-truncate" style="white-space: nowrap;">
+                        {{ "{:,.2f}".format(istatistik.ciro).replace(',', 'X').replace('.', ',').replace('X', '.') }} ₺
+                    </h3>
+                </div>
+                <div class="icon-box bg-success bg-opacity-10 text-success flex-shrink-0 ms-2"><i class="fas fa-wallet"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-secondary small fw-bold text-uppercase d-block mb-1">Aktif İşlemler</span>
+                    <h4 class="fw-bold text-dark mb-0">{{ "{:,}".format(istatistik.aktif).replace(',', '.') }}</h4>
+                </div>
+                <div class="icon-box bg-primary bg-opacity-10 text-primary" style="font-size:1.4rem;"><i class="fas fa-key"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-secondary small fw-bold text-uppercase d-block mb-1">Toplam Araç</span>
+                    <h4 class="fw-bold text-dark mb-0">{{ "{:,}".format(istatistik.arac).replace(',', '.') }}</h4>
+                </div>
+                <div class="icon-box bg-warning bg-opacity-10 text-warning" style="font-size:1.4rem;"><i class="fas fa-car"></i></div>
+            </div>
+        </div>
+        <div class="col-lg-2 col-md-6">
+            <div class="stat-card p-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-secondary small fw-bold text-uppercase d-block mb-1">Üyeler</span>
+                    <h4 class="fw-bold text-dark mb-0">{{ "{:,}".format(istatistik.musteri).replace(',', '.') }}</h4>
+                </div>
+                <div class="icon-box bg-info bg-opacity-10 text-info" style="font-size:1.4rem;"><i class="fas fa-users"></i></div>
+            </div>
+        </div>
+    </div>
+
+    {% if uyarilar %}
+    <div class="alert alert-dismissible fade show bg-light border-0 shadow-sm rounded-4 p-0 overflow-hidden mb-4" role="alert">
+        <div class="d-flex align-items-stretch">
+            
+            <div class="p-3 flex-grow-1">
+                <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                    <h6 class="text-danger fw-bold mb-0">
+                        <i class="fas fa-history me-2"></i>Sigorta Süresi Yaklaşanlar
+                    </h6>
+                    
+                    {% if uyarilar|length > 4 %}
+                    <button type="button" onclick="toggleUyarilar()" id="toggleUyariBtn" class="btn badge bg-white text-danger border border-danger text-decoration-none py-2 px-3 rounded-pill" style="cursor: pointer;">
+                        Tümünü Göster <i class="fas fa-chevron-down ms-1"></i>
+                    </button>
+                    {% endif %}
+                </div>
+
+                <div class="row g-2" id="uyariContainer">
+                    {% for uyari in uyarilar %}
+                        <div class="col-md-6 col-xl-3 {% if loop.index > 4 %}extra-uyari d-none{% endif %}">
+                            <div class="d-flex align-items-center bg-white rounded-3 p-2 border shadow-sm h-100 position-relative overflow-hidden">
+                                <div class="position-absolute top-0 start-0 bottom-0 bg-danger" style="width: 4px;"></div>
+                                
+                                <div class="bg-danger bg-opacity-10 text-danger rounded p-2 me-2 ms-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                                    <i class="fas fa-file-contract"></i>
+                                </div>
+                                
+                                <div class="lh-1 overflow-hidden">
+                                    <span class="fw-bold text-dark d-block text-truncate mb-1" style="font-size: 0.9rem;">{{ uyari.plaka }}</span>
+                                    <span class="fw-bold text-danger d-block text-truncate" style="font-size: 11px;">
+                                        {% if uyari.kalan_gun < 0 %}
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ uyari.kalan_gun * -1 }} Gün Geçti!
+                                        {% else %}
+                                            <i class="fas fa-hourglass-half me-1"></i>{{ uyari.kalan_gun }} Gün Kaldı
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="bg-danger text-white d-flex align-items-center justify-content-center px-4" style="min-width: 80px;">
+                <i class="fas fa-exclamation-triangle fa-2x"></i>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+            <h6 class="text-uppercase text-secondary fw-bold small ls-1 mb-0">Popüler Markalar</h6>
+            <span class="badge bg-white text-dark border">Top 5</span>
+        </div>
+        
+        <div class="row row-cols-2 row-cols-md-5 g-3">
+            {% for i in range(marka_isimleri|length) %}
+            <div class="col">
+                <div class="brand-card p-3 d-flex flex-column align-items-center justify-content-center text-center h-100">
+                    <span class="rank-badge-lg rank-{{ i+1 if i < 3 else 'normal' }}">{{ i + 1 }}</span>
+                    <h6 class="fw-bold text-dark mb-1">{{ marka_isimleri[i] }}</h6>
+                    <span class="badge bg-light text-primary border fw-bold">{{ marka_sayilari[i] }} Kiralama</span>
+                </div>
+            </div>
+            {% else %}
+            <div class="col-12 text-center text-muted">Veri bulunamadı.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="row g-4">
+        
+        <div class="col-lg-4"> 
+            <div class="content-card p-0 h-100">
+                <div class="p-2 border-bottom bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Son Katılan Üyeler</h5>
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div class="p-3" style="max-height: 400px; overflow-y: auto;">
+                    <div class="d-flex flex-column gap-3">
+                    {% if musteriler %}
+                        {% for musteri in musteriler %}
+                        <div class="d-flex align-items-center p-2 rounded hover-bg-light border-bottom border-light">
+                            <img src="{{ url_for('static', filename='img/profiles/' + (musteri.ProfilResim if musteri.ProfilResim else 'default_user.png')) }}" 
+                                 class="rounded-circle shadow-sm me-3 border border-2 border-white" width="48" height="48" style="object-fit:cover;">
+                            <div class="flex-grow-1 overflow-hidden">
+                                <h6 class="mb-0 fw-bold text-dark">{{ musteri.ad }} {{ musteri.soyad }}</h6>
+                                <small class="text-muted d-block text-truncate">{{ musteri.eposta }}</small>
+                            </div>
+                            <span class="badge bg-light text-secondary border fw-normal">#{{ musteri.musteri_id }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center text-muted py-3">Henüz üye yok.</div>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8"> 
+            <div class="content-card p-0 overflow-hidden h-100"> 
+                <div class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white">
+                    <h5 class="fw-bold mb-0">Son İşlemler</h5>
+                    <div class="d-flex gap-2">
+                        <button onclick="filterTable('all')" class="btn btn-sm btn-outline-dark rounded-pill px-3 fw-bold filter-btn active" id="btn-all">
+                            Tümü
+                        </button>
+                        <button onclick="filterTable('REZ')" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-bold filter-btn" id="btn-rez">
+                            <i class="fas fa-circle small me-1"></i>Kiralama
+                        </button>
+                        <button onclick="filterTable('BAK')" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold filter-btn" id="btn-bak">
+                            <i class="fas fa-circle small me-1"></i>Bakım
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive" style="max-height: 550px; overflow-y: auto;">
+                    <table class="table table-custom table-hover align-middle mb-0">
+                        <thead style="position: sticky; top: 0; z-index: 2; background-color: #f1f5f9;">
+                            <tr>
+                                <th class="ps-4">Araç</th>
+                                <th>İşlem / Müşteri</th>
+                                <th>Tutar</th>
+                                <th>Durum</th>
+                                <th class="text-end pe-4">Aksiyon</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if son_islemler %}
+                                {% for islem in son_islemler %}
+                                <tr class="islem-row type-{{ islem.tip }}">
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-light rounded-3 p-2 me-3 text-center border" style="width: 48px; height: 48px; display:grid; place-items:center;">
+                                                <i class="fas fa-car text-secondary fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark">{{ islem.marka }} {{ islem.model }}</div>
+                                                <small class="text-muted fw-bold" style="font-size: 11px;">{{ islem.plaka }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if islem.tip == 'REZ' %}
+                                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle me-2 fw-bold d-flex align-items-center justify-content-center" style="width:32px; height:32px; font-size:12px;">
+                                                    {{ islem.baslik[0] }}
+                                                </div>
+                                                <div>
+                                                    <span class="fw-bold text-dark d-block" style="font-size: 0.9rem;">{{ islem.baslik }} {{ islem.alt_baslik }}</span>
+                                                    <small class="text-muted" style="font-size: 10px;">Müşteri</small>
+                                                </div>
+                                            {% else %}
+                                                <div class="bg-danger bg-opacity-10 text-danger rounded-circle me-2 fw-bold d-flex align-items-center justify-content-center" style="width:32px; height:32px; font-size:12px;">
+                                                    <i class="fas fa-tools"></i>
+                                                </div>
+                                                <div>
+                                                    <span class="fw-bold text-dark d-block" style="font-size: 0.9rem;">Servis Kaydı</span>
+                                                    <small class="text-danger fw-bold" style="font-size: 10px;">{{ islem.alt_baslik }}</small>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        {% if islem.tip == 'REZ' %}
+                                            <span class="fw-bold text-success">+{{ "{:,.2f}".format(islem.tutar).replace(',', 'X').replace('.', ',').replace('X', '.') }} ₺</span>
+                                        {% else %}
+                                            <span class="fw-bold text-danger">-{{ "{:,.2f}".format(islem.tutar).replace(',', 'X').replace('.', ',').replace('X', '.') }} ₺</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {% if islem.durum == 'Onaylandı' or islem.durum == 'Kirada' %}
+                                            <span class="badge badge-soft-primary">Kirada</span>
+                                        {% elif islem.durum == 'Tamamlandı' %}
+                                            <span class="badge badge-soft-success">Tamamlandı</span>
+                                        {% elif islem.durum == 'Bakımda' %}
+                                            <span class="badge badge-soft-warning">Bakımda</span>
+                                        {% else %}
+                                            <span class="badge badge-soft-warning">{{ islem.durum }}</span>
+                                        {% endif %}
+                                    </td>
+
+                                    <td class="text-end pe-4">
+                                        <div class="d-flex justify-content-end align-items-center gap-2">
+                                            {% if islem.tip == 'REZ' %}
+                                                {% if islem.durum == 'Onaylandı' or islem.durum == 'Kirada' %}
+                                                    <a href="{{ url_for('admin.teslim_al', kiralama_id=islem.id) }}" 
+                                                       onclick="return confirm('Araç teslim alınıyor, emin misiniz?')"
+                                                       class="btn btn-sm btn-dark rounded-pill px-3 fw-bold text-nowrap" 
+                                                       title="Teslim Al">
+                                                        <i class="fas fa-check me-1"></i> Teslim
+                                                    </a>
+                                                {% endif %}
+                                                <a href="{{ url_for('rental.sozlesme_indir', kiralama_id=islem.id) }}" 
+                                                   target="_blank" 
+                                                   class="btn btn-sm btn-light border rounded-circle shadow-sm d-flex align-items-center justify-content-center" 
+                                                   style="width: 32px; height: 32px; min-width: 32px;"
+                                                   title="Sözleşme İndir">
+                                                    <i class="fas fa-file-pdf text-danger"></i>
+                                                </a>
+                                            {% else %}
+                                                {% if islem.durum != 'Tamamlandı' %}
+                                                    <a href="{{ url_for('admin.bakim_bitir', bakim_id=islem.id) }}" 
+                                                       onclick="return confirm('Bakım tamamlandı mı?')"
+                                                       class="btn btn-sm btn-warning text-dark rounded-pill px-3 fw-bold text-nowrap" 
+                                                       title="Bakımı Bitir">
+                                                        <i class="fas fa-check-double me-1"></i> Bitir
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-muted small"><i class="fas fa-check-circle text-success"></i> Bitti</span>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="5" class="text-center py-5 text-muted fw-bold">Henüz kayıt bulunamadı.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="ciroModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-dark text-white border-0 py-3">
+                <h5 class="modal-title fw-bold"><i class="fas fa-chart-line me-2 text-warning"></i>Finansal Detaylar</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        <canvas id="finansChart" style="max-height: 350px;"></canvas>
+                    </div>
+                </div>
+                <div class="row g-3 text-center">
+                    <div class="col-6">
+                        <div class="p-3 bg-white rounded-3 shadow-sm border-bottom border-success border-4">
+                            <small class="text-uppercase text-muted fw-bold">Toplam Gelir</small>
+                            <h4 class="fw-bold text-success mb-0">
+                                {{ "{:,.2f}".format(finans_gelirler|sum).replace(',', 'X').replace('.', ',').replace('X', '.') }} ₺
+                            </h4>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 bg-white rounded-3 shadow-sm border-bottom border-danger border-4">
+                            <small class="text-uppercase text-muted fw-bold">Toplam Gider</small>
+                            <h4 class="fw-bold text-danger mb-0">
+                                {{ "{:,.2f}".format(finans_giderler|sum).replace(',', 'X').replace('.', ',').replace('X', '.') }} ₺
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleUyarilar() {
+    // Sadece gizlenip açılacak olan (extra-uyari sınıfına sahip) elemanları seç
+    const hiddenItems = document.querySelectorAll('.extra-uyari');
+    const btn = document.getElementById('toggleUyariBtn');
+    
+    // Güvenlik kontrolü: Eğer gizli eleman yoksa işlem yapma
+    if (hiddenItems.length === 0) return;
+
+    const isClosed = hiddenItems[0].classList.contains('d-none');
+
+    // Döngü ile hepsini aç veya kapat
+    hiddenItems.forEach(item => {
+        if (isClosed) {
+            item.classList.remove('d-none'); // Göster
+        } else {
+            item.classList.add('d-none');    // Gizle
+        }
+    });
+
+    if (isClosed) {
+        btn.innerHTML = 'Daralt <i class="fas fa-chevron-up ms-1"></i>';
+    } else {
+        btn.innerHTML = 'Tümünü Göster <i class="fas fa-chevron-down ms-1"></i>';
+    }
+}
+
+    // --- TABLO FİLTRELEME SCRİPTİ ---
+    function filterTable(type) {
+        // Satırları gizle/göster
+        const rows = document.querySelectorAll('.islem-row');
+        rows.forEach(row => {
+            if (type === 'all') {
+                row.style.display = '';
+            } else {
+                if (row.classList.contains('type-' + type)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        });
+
+        // Buton renklerini güncelle
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active', 'btn-dark', 'btn-primary', 'btn-danger');
+            if(btn.id === 'btn-all') btn.classList.add('btn-outline-dark');
+            if(btn.id === 'btn-rez') btn.classList.add('btn-outline-primary');
+            if(btn.id === 'btn-bak') btn.classList.add('btn-outline-danger');
+        });
+
+        if (type === 'all') {
+            const btn = document.getElementById('btn-all');
+            btn.classList.remove('btn-outline-dark');
+            btn.classList.add('btn-dark', 'active');
+        } else if (type === 'REZ') {
+            const btn = document.getElementById('btn-rez');
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-primary', 'active');
+        } else if (type === 'BAK') {
+            const btn = document.getElementById('btn-bak');
+            btn.classList.remove('btn-outline-danger');
+            btn.classList.add('btn-danger', 'active');
+        }
+    }
+
+    const ctxFinans = document.getElementById('finansChart').getContext('2d');
+    new Chart(ctxFinans, {
+        type: 'bar',
+        data: {
+            labels: {{ finans_aylar | tojson }},
+            datasets: [
+                {
+                    label: 'Gelir (Kiralama)',
+                    data: {{ finans_gelirler | tojson }},
+                    backgroundColor: '#10b981',
+                    borderRadius: 4
+                },
+                {
+                    label: 'Gider (Bakım)',
+                    data: {{ finans_giderler | tojson }},
+                    backgroundColor: '#ef4444',
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'top' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) { label += ': '; }
+                            if (context.parsed.y !== null) {
+                                label += new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(context.parsed.y);
+                            }
+                            return label;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { callback: function(value) { return new Intl.NumberFormat('tr-TR').format(value) + ' ₺'; } }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

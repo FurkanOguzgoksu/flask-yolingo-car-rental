@@ -1,0 +1,270 @@
+{% extends "layout.html" %}
+
+{% block title %}Veritabanı Yönetimi | Yolingo{% endblock %}
+
+{% block body %}
+<style>
+    /* TEMA TANIMLAMALARI */
+    :root {
+        --yolingo-dark: #0b1228;
+        --yolingo-blue-gradient: linear-gradient(90deg, #0b1228 0%, #1e3a8a 100%);
+        --yolingo-orange: #f97316;
+        --yolingo-orange-hover: #ea580c;
+    }
+
+    /* BAŞLIK ALANI */
+    .db-header {
+        background: var(--yolingo-blue-gradient);
+        color: white;
+        border-left: 6px solid var(--yolingo-orange) !important;
+    }
+
+    /* METİN RENKLERİ */
+    .text-orange { color: var(--yolingo-orange) !important; }
+    .bg-orange { background-color: var(--yolingo-orange) !important; color: white !important; }
+
+    /* SEKMELER (TABS) */
+    .nav-tabs .nav-link {
+        color: #64748b;
+        font-weight: 600;
+        border: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+    }
+    .nav-tabs .nav-link:hover {
+        color: var(--yolingo-orange);
+        background-color: rgba(249, 115, 22, 0.05);
+    }
+    .nav-tabs .nav-link.active {
+        color: var(--yolingo-orange) !important;
+        border-bottom: 3px solid var(--yolingo-orange);
+        background-color: white;
+    }
+
+    /* LİSTE GRUBU (SOL MENÜ) */
+    .list-group-item-action.active-custom {
+        background-color: var(--yolingo-orange);
+        color: white;
+        border-color: var(--yolingo-orange);
+        font-weight: 700;
+    }
+    .list-group-item-action:hover {
+        background-color: #f1f5f9;
+        color: var(--yolingo-orange);
+    }
+
+    /* TABLOLAR */
+    .table-header-dark {
+        background-color: var(--yolingo-dark);
+        color: white;
+    }
+    .table-header-dark th {
+        font-weight: 500;
+        border: none;
+    }
+
+    /* SQL EDİTÖRÜ */
+    .sql-editor {
+        background-color: #f8fafc; /* Çok açık gri */
+        color: #1e293b; /* Koyu lacivert yazı */
+        border: 1px solid #cbd5e1;
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+    .sql-editor:focus {
+        background-color: #ffffff;
+        border-color: var(--yolingo-orange);
+        box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+        color: #0f172a;
+    }
+
+    /* BUTONLAR */
+    .btn-orange {
+        background-color: var(--yolingo-orange);
+        color: white;
+        border: none;
+        transition: all 0.3s;
+    }
+    .btn-orange:hover {
+        background-color: var(--yolingo-orange-hover);
+        color: white;
+        transform: translateY(-2px);
+    }
+    .btn-outline-light-custom {
+        border: 2px solid rgba(255,255,255,0.3);
+        color: white;
+    }
+    .btn-outline-light-custom:hover {
+        background-color: white;
+        color: var(--yolingo-dark);
+    }
+</style>
+
+<div class="container-fluid px-1 py-3 mt-2">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 p-4 db-header shadow rounded-4">
+        <div>
+            <h2 class="mb-0 fw-bold text-uppercase">
+                <i class="fas fa-database me-2 text-orange"></i>Veritabanı Yönetim Merkezi
+            </h2>
+            <span class="text-white-50 small">Tüm tablolar, ham veriler ve SQL konsolu.</span>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light-custom fw-bold rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i>Panele Dön
+        </a>
+    </div>
+
+    <ul class="nav nav-tabs mb-4 border-bottom-0" id="dbTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active shadow-sm me-2 rounded-top"
+                    id="explorer-tab" data-bs-toggle="tab" data-bs-target="#explorer" type="button" role="tab" aria-selected="true">
+                <i class="fas fa-table me-2"></i>Tablo Gezgini
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link shadow-sm rounded-top"
+                    id="sql-tab" data-bs-toggle="tab" data-bs-target="#sql" type="button" role="tab" aria-selected="false">
+                <i class="fas fa-terminal me-2"></i>SQL Konsolu
+            </button>
+        </li>
+        </ul>
+
+    <div class="tab-content">
+
+        <div class="tab-pane fade show active" id="explorer" role="tabpanel">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card shadow border-0 rounded-4 overflow-hidden">
+                        <div class="card-header text-white fw-bold py-3" style="background-color: var(--yolingo-dark);">
+                            <i class="fas fa-list-ul me-2"></i>Tablolar
+                        </div>
+                        <div class="list-group list-group-flush">
+                            {% set gizli_tablolar = ['ekstrahizmet', 'rezervasyonekstra'] %} 
+
+                            {% for t in tables %}
+                                {% if t not in gizli_tablolar %}
+                                    <a href="?tablo={{ t }}" 
+                                       class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {{ 'active-custom' if secilen_tablo == t else '' }}">
+                                        <span><i class="fas fa-table me-2 {{ 'text-white' if secilen_tablo == t else 'text-secondary' }}"></i>{{ t }}</span>
+                                        {% if secilen_tablo == t %}
+                                            <i class="fas fa-chevron-right small"></i>
+                                        {% endif %}
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-9">
+                    <div class="card shadow border-0 rounded-4 overflow-hidden">
+                        <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center py-3 border-bottom">
+                            <span class="text-dark"><i class="fas fa-list me-2 text-orange"></i>{{ secilen_tablo or 'Tablo Seçiniz' }} Verileri</span>
+                            {% if rows %}
+                                <span class="badge bg-orange rounded-pill">{{ rows|length }} Kayıt</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-body p-0 table-responsive" style="max-height: 600px;">
+                            {% if secilen_tablo and columns %}
+                                <table class="table table-striped table-hover mb-0 font-monospace small">
+                                    <thead class="table-header-dark sticky-top">
+                                        <tr>
+                                            {% for col in columns %}
+                                                <th>{{ col }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in rows %}
+                                            <tr>
+                                                {% for cell in row %}
+                                                    <td>{{ cell }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            {% else %}
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fas fa-arrow-left fa-3x mb-3 text-orange opacity-50"></i>
+                                    <p class="fw-bold">Verilerini görmek için soldan bir tablo seçin.</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="sql" role="tabpanel">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-body bg-white rounded-4 p-4">
+                    <label class="fw-bold text-dark mb-2">
+                        <i class="fas fa-code me-2 text-orange"></i>SQL Sorgusu Yazın:
+                    </label>
+                    
+                    <textarea id="sqlInput"
+                              class="form-control sql-editor shadow-none rounded-3 p-3"
+                              rows="8"
+                              placeholder="-- Örnek Sorgu --&#10;SELECT * FROM Musteri WHERE ad LIKE 'A%';"></textarea>
+                              
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i>Sadece SELECT, INSERT, UPDATE, DELETE sorguları çalışır.</small>
+                        <button type="button" onclick="runSQL()" class="btn btn-orange fw-bold px-4 rounded-pill shadow-sm">
+                            <i class="fas fa-play me-2"></i>Sorguyu Çalıştır
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sqlResult" class="mt-4"></div>
+        </div>
+
+        </div>
+</div>
+
+<script>
+  function runSQL() {
+    const query = document.getElementById('sqlInput').value;
+    const resultDiv = document.getElementById('sqlResult');
+
+    resultDiv.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-orange"></div></div>';
+
+    fetch('/admin/run-sql', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: 'query=' + encodeURIComponent(query)
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'error') {
+        resultDiv.innerHTML = `<div class="alert alert-danger font-monospace border-0 shadow-sm"><i class="fas fa-exclamation-circle me-2"></i>${data.message}</div>`;
+      } else if (data.message) {
+        resultDiv.innerHTML = `<div class="alert alert-success font-monospace border-0 shadow-sm"><i class="fas fa-check-circle me-2"></i>${data.message}</div>`;
+      } else {
+        let html = '<div class="card shadow border-0 rounded-4 overflow-hidden"><div class="card-header bg-dark text-white fw-bold"><i class="fas fa-poll me-2"></i>Sorgu Sonucu</div><div class="card-body p-0 table-responsive"><table class="table table-hover mb-0 font-monospace small">';
+        
+        // Başlık
+        html += '<thead class="table-light"><tr>';
+        data.columns.forEach(col => html += `<th>${col}</th>`);
+        html += '</tr></thead><tbody>';
+
+        // Satırlar
+        data.rows.forEach(row => {
+          html += '<tr>';
+          row.forEach(cell => html += `<td>${cell}</td>`);
+          html += '</tr>';
+        });
+
+        html += '</tbody></table></div></div>';
+        resultDiv.innerHTML = html;
+      }
+    })
+    .catch(() => {
+      resultDiv.innerHTML = `<div class="alert alert-danger font-monospace">Sunucuya ulaşılamadı.</div>`;
+    });
+  }
+</script>
+{% endblock %}

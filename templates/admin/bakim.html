@@ -1,0 +1,229 @@
+{% extends "layout.html" %}
+
+{% block title %}Bakım Yönetimi | Yolingo{% endblock %}
+
+{% block content %}
+<style>
+    /* TEMA RENKLERİ */
+    :root {
+        --yolingo-dark: #0b1228;
+        --yolingo-orange: #f97316;
+        --yolingo-orange-hover: #ea580c;
+    }
+
+    /* KART BAŞLIKLARI */
+    .card-header-custom {
+        background-color: var(--yolingo-dark);
+        color: white;
+        border-bottom: 3px solid var(--yolingo-orange);
+    }
+
+    /* BUTONLAR */
+    .btn-orange {
+        background-color: var(--yolingo-orange);
+        color: white;
+        border: none;
+        transition: all 0.3s;
+    }
+    .btn-orange:hover {
+        background-color: var(--yolingo-orange-hover);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
+    }
+
+    .btn-outline-custom {
+        border: 2px solid var(--yolingo-dark);
+        color: var(--yolingo-dark);
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    .btn-outline-custom:hover {
+        background-color: var(--yolingo-dark);
+        color: white;
+    }
+
+    /* FORM FOCUS */
+    .form-control:focus, .form-select:focus {
+        border-color: var(--yolingo-orange);
+        box-shadow: 0 0 0 0.25rem rgba(249, 115, 22, 0.25);
+    }
+
+    /* TABLO */
+    .table-hover tbody tr:hover {
+        background-color: rgba(249, 115, 22, 0.05);
+    }
+</style>
+
+<div class="container-fluid px-4 py-4 mt-2">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0 text-dark">
+                <i class="fas fa-tools text-orange me-2" style="color: #f97316;"></i>Araç Bakım & Gider Yönetimi
+            </h2>
+            <p class="text-muted small mb-0">Araçların servis kayıtlarını ve bakım maliyetlerini buradan yönetebilirsiniz.</p>
+        </div>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-custom rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i>Panele Dön
+        </a>
+    </div>
+
+    <div class="row g-4">
+        
+        <div class="col-lg-3">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100">
+                <div class="card-header card-header-custom py-3 fw-bold">
+                    <i class="fas fa-plus-circle me-2"></i> Aracı Bakıma Al
+                </div>
+                <div class="card-body p-4 bg-white">
+                    <form method="POST" action="{{ url_for('admin.bakim') }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Araç Seçin</label>
+                            <select name="arac_id" class="form-select" required>
+                                <option value="" disabled selected>-- Müsait Araçlar --</option>
+                                {% for a in araclar %}
+                                    <option value="{{ a.arac_id }}">{{ a.plaka }} - {{ a.marka }} {{ a.model }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">İlgili Personel</label>
+                            <select name="personel_id" class="form-select" required>
+                                <option value="" disabled selected>-- Personel Seçin --</option>
+                                {% for p in personeller %}
+                                    <option value="{{ p.personel_id }}">{{ p.ad }} {{ p.soyad }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">İşlem / Neden</label>
+                            <textarea name="neden" class="form-control" rows="3" required placeholder="Örn: 10.000 Bakımı, Yağ Değişimi..."></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Giriş Tarihi</label>
+                            <input type="date" name="tarih" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-secondary">Maliyet (TL)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white text-danger fw-bold">₺</span>
+                                <input type="number" name="maliyet" class="form-control text-danger fw-bold" step="0.01" min="0" placeholder="0.00" required>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-orange py-2 fw-bold rounded-pill">
+                                <i class="fas fa-wrench me-2"></i> Bakıma Al
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100">
+                <div class="card-header card-header-custom py-3 fw-bold d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-history me-2"></i> Bakım Takip Listesi</span>
+                    <span class="badge bg-light text-dark rounded-pill">{{ bakimlar|length }} Kayıt</span>
+                </div>
+                
+                <div class="table-responsive" style="max-height: 600px; overflow-y: auto;">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="bg-light text-secondary small text-uppercase" style="position: sticky; top: 0; z-index: 2;">
+                            <tr>
+                                <th class="ps-4">Araç</th>
+                                <th>Personel</th> <th>Neden</th>
+                                <th>Maliyet</th>
+                                <th>Giriş / Çıkış</th>
+                                <th>Durum</th>
+                                <th class="text-end pe-4">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in bakimlar %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-light rounded p-2 me-2 border text-center" style="width:40px;">
+                                            <i class="fas fa-car text-secondary"></i>
+                                        </div>
+                                        <div>
+                                            <span class="fw-bold text-dark d-block">{{ b.plaka }}</span>
+                                            <small class="text-muted">{{ b.marka }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {% if b.ad %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px; font-size: 0.8rem;">
+                                                {{ b.ad[0] }}{{ b.soyad[0] }}
+                                            </div>
+                                            <span class="fw-bold small text-dark">{{ b.ad }} {{ b.soyad }}</span>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted small fst-italic">Belirtilmedi</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-secondary small" style="max-width: 250px;">{{ b.bakim_nedeni }}</td>
+
+                                <td class="text-danger fw-bold">-{{ "{:,.2f}".format(b.maliyet) }} ₺</td>
+                                
+                                <td class="small" style="min-width: 140px;">
+                                    <div class="text-dark mb-1">
+                                        <i class="fas fa-sign-in-alt text-warning me-1" title="Giriş Tarihi"></i> {{ b.giris_tarihi }}
+                                    </div>
+                                    
+                                    {% if b.durum != 'Devam Ediyor' and b.cikis_tarihi %}
+                                        <div class="text-success fw-bold">
+                                            <i class="fas fa-check-circle me-1" title="Bitiş Tarihi"></i> {{ b.cikis_tarihi }}
+                                        </div>
+                                    {% else %}
+                                        <div class="text-muted small ps-4">---</div>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if b.durum == 'Devam Ediyor' %}
+                                        <span class="badge bg-warning text-dark rounded-pill px-3">
+                                            <i class="fas fa-cog fa-spin me-1"></i> Serviste
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-success rounded-pill px-3">
+                                            <i class="fas fa-check-circle me-1"></i> Bitti
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    {% if b.durum == 'Devam Ediyor' %}
+                                        <a href="{{ url_for('admin.bakim_bitir', bakim_id=b.bakim_id) }}" 
+                                           class="btn btn-sm btn-outline-success rounded-pill px-3 fw-bold" 
+                                           title="Bakımı Bitir ve Aracı Müsait Yap"
+                                           onclick="return confirm('Bakım tamamlandı olarak işaretlensin mi?')">
+                                            <i class="fas fa-check me-1"></i> Bitir
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted small"><i class="fas fa-lock"></i> Kilitli</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="7" class="text-center py-5 text-muted">Henüz bakım kaydı bulunmuyor.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

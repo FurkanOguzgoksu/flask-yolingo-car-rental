@@ -1,0 +1,91 @@
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-custom shadow">
+    <div class="container">
+
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+            <i class="fas fa-car-side me-2"></i>Yolıngo
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+
+                {% if session.get('user_id') %}
+
+                {% if session.get('role') == 'admin' %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+                        <i class="fas fa-chart-line me-1"></i>YÖNETİM
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="nav-item dropdown ms-3">
+                    <a class="nav-link dropdown-toggle d-flex align-items-center rounded-pill px-3 py-1 text-decoration-none user-profile-btn"
+                        href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                        style="color: white !important;">
+
+                        <img src="{{ url_for('static', filename='img/profiles/' + session.get('user_img', 'default_user.png')) }}"
+                            alt="Profil" class="rounded-circle border me-2" style="
+                                        border-color: var(--yolingo-orange) !important;
+                                        width: 32px;
+                                        height: 32px;
+                                        object-fit: cover;
+                                    ">
+
+                        <span class="small fw-bold text-uppercase">
+                            {{ session.get('user_name', session.get('ad', 'HESABIM')) }}
+                        </span>
+                    </a>
+
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark-custom"
+                        aria-labelledby="navbarDropdown">
+                        {% if session.get('role') == 'musteri' %}
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.profil') }}">
+                                <i class="fas fa-id-card me-2"></i>Profilim
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('customer.favorilerim') }}">
+                                <i class="fas fa-heart me-2"></i>Favorilerim
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url_for('rental.kiralamalarim') }}">
+                                <i class="fas fa-key me-2"></i>Kiralamalarım
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider border-secondary">
+                        </li>
+                        {% endif %}
+
+                        <li>
+                            <a class="dropdown-item text-danger fw-bold" href="{{ url_for('auth.logout') }}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                {% else %}
+
+                <li class="nav-item ms-2">
+                    <a class="btn btn-register" href="{{ url_for('auth.register') }}">
+                        <i class="fas fa-user-plus me-1"></i>Kayıt Ol
+                    </a>
+                </li>
+                <li class="nav-item ms-2">
+                    <a class="btn btn-login" href="{{ url_for('auth.login') }}">
+                        <i class="fas fa-right-to-bracket me-1"></i>Giriş Yap
+                    </a>
+                </li>
+
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

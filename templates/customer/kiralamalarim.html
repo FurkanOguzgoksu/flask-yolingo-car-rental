@@ -1,0 +1,191 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container py-4 mt-3">
+    <h2 class="fw-bold mb-4 text-dark">
+        <i class="fas fa-history text-orange me-2"></i>Kiralama Geçmişim
+    </h2>
+    
+    {% if kiralamalar %}
+        <div class="row g-4">
+            {% for kiralama in kiralamalar %}
+            <div class="col-lg-6">
+                <div class="card bg-white shadow-sm border-0 h-100 overflow-hidden">
+                    <div class="row g-0 h-100">
+
+                        <div class="col-md-4 position-relative d-flex align-items-center justify-content-center bg-light">
+                            <img src="{{ url_for('static', filename='img/' + kiralama.resim_url) }}" 
+                                 class="img-fluid p-2"
+                                 style="object-fit: contain; max-height: 180px; width: auto; max-width: 100%;"
+                                 alt="Araç Resmi">
+
+                            <div class="position-absolute top-0 start-0 p-2">
+                                <span class="badge 
+                                    {% if kiralama.durum == 'Bekliyor' %}bg-warning text-dark
+                                    {% elif kiralama.durum == 'Onaylandı' %}bg-primary
+                                    {% elif kiralama.durum == 'Kirada' %}bg-success
+                                    {% elif kiralama.durum == 'Tamamlandı' %}bg-secondary
+                                    {% else %}bg-danger{% endif %}">
+                                    {{ kiralama.durum }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="card-body d-flex flex-column h-100">
+
+                                <h5 class="fw-bold text-dark mb-1">
+                                    {{ kiralama.marka }} {{ kiralama.model }}
+                                </h5>
+
+                                <p class="text-muted small mb-2">
+                                    Kiralama ID: #{{ kiralama.kiralama_id }}
+                                </p>
+
+                                <div class="row small mb-2">
+                                    <div class="col-6">
+                                        <i class="fas fa-calendar-alt text-orange me-1"></i> 
+                                        {{ kiralama.baslangic_tarihi }}
+                                    </div>
+                                    <div class="col-6">
+                                        <i class="fas fa-calendar-check text-orange me-1"></i> 
+                                        {{ kiralama.bitis_tarihi }}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <strong>Toplam Tutar:</strong>
+                                    <span class="text-success fw-bold">
+                                        {{ kiralama.toplam_ucret }} TL
+                                    </span>
+                                </div>
+
+                                {% if kiralama.ekstralar_str %}
+                                    <div class="mb-3 p-2 bg-light rounded border border-orange border-opacity-25">
+                                        <small class="d-block fw-bold text-muted mb-1">
+                                            <i class="fas fa-plus-circle text-orange me-1"></i>
+                                            Ekstra Hizmetler:
+                                        </small>
+                                        <span class="small text-dark">
+                                            {{ kiralama.ekstralar_str }}
+                                        </span>
+                                    </div>
+                                {% endif %}
+
+                                <div class="mt-auto d-flex flex-column gap-2">
+                                    <a href="{{ url_for('rental.sozlesme_indir', kiralama_id=kiralama.kiralama_id) }}" 
+                                       class="btn btn-outline-dark btn-sm">
+                                       <i class="fas fa-file-pdf me-1"></i> Sözleşmeli Faturayı İndir
+                                    </a>
+
+                                    {% if kiralama.durum in ['Onaylandı', 'Tamamlandı'] %}
+                                        <button type="button"
+                                                class="btn btn-orange btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#yorumModal{{ kiralama.kiralama_id }}">
+                                            <i class="fas fa-star me-1"></i> Yorum Yap
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="yorumModal{{ kiralama.kiralama_id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header bg-orange text-white">
+                            <h5 class="modal-title fw-bold">Hizmetimizi Değerlendirin</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <form action="{{ url_for('customer.yorum_yap') }}" method="POST">
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark">Puanınız</label>
+                                    
+                                    <div class="rating fs-3 text-orange mb-2" id="ratingContainer{{ kiralama.kiralama_id }}">
+                                        <i class="far fa-star" onclick="puanVer(1, {{ kiralama.kiralama_id }})"></i>
+                                        <i class="far fa-star" onclick="puanVer(2, {{ kiralama.kiralama_id }})"></i>
+                                        <i class="far fa-star" onclick="puanVer(3, {{ kiralama.kiralama_id }})"></i>
+                                        <i class="far fa-star" onclick="puanVer(4, {{ kiralama.kiralama_id }})"></i>
+                                        <i class="far fa-star" onclick="puanVer(5, {{ kiralama.kiralama_id }})"></i>
+                                    </div>
+                                    
+                                    <input type="hidden" name="puan" id="puanInput{{ kiralama.kiralama_id }}" value="5">
+                                    <input type="hidden" name="kiralama_id" value="{{ kiralama.kiralama_id }}">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold text-dark">Yorumunuz</label>
+                                    <textarea class="form-control border-secondary"
+                                              name="yorum_metni"
+                                              rows="3"
+                                              placeholder="Deneyiminizi buraya yazın..."
+                                              required></textarea>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-orange w-100 fw-bold">
+                                    Gönder
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info shadow-sm">
+            <i class="fas fa-info-circle me-2"></i>
+            Henüz bir kiralama işleminiz bulunmuyor.
+            <a href="{{ url_for('index') }}" class="fw-bold text-dark">
+                Hemen Kirala!
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .text-orange { color: #f97316 !important; }
+    .bg-orange { background-color: #f97316 !important; color: #fff !important; }
+    .border-orange { border-color: #f97316 !important; }
+    
+    .btn-orange {
+        background-color: #f97316 !important;
+        border-color: #f97316 !important;
+        color: #fff !important;
+    }
+    .btn-orange:hover {
+        background-color: #ea580c !important;
+        color: #fff !important;
+    }
+    
+    /* Yıldızlar için imleç */
+    .rating i { cursor: pointer; transition: transform 0.2s; }
+    .rating i:hover { transform: scale(1.2); }
+</style>
+
+<script>
+function puanVer(puan, rezId) {
+    document.getElementById('puanInput' + rezId).value = puan;
+    let container = document.getElementById('ratingContainer' + rezId);
+    let stars = container.querySelectorAll('i');
+    
+    stars.forEach((star, index) => {
+        if (index < puan) {
+            star.classList.remove('far');
+            star.classList.add('fas');
+        } else {
+            star.classList.remove('fas');
+            star.classList.add('far');
+        }
+    });
+}
+</script>
+
+{% endblock %}
