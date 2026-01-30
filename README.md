@@ -23,8 +23,6 @@ Bu çalışma, **veritabanı bağlantısı ve yönetimi** konularını pekiştir
 *   **Güvenli Ödeme:** Kredi kartı ile sanal ödeme simülasyonu.
 
 
----
-
 ### 🛡️ Yönetici (Admin) Paneli
 *   **Gelişmiş Dashboard:** Anlık ciro, aktif kiralama, araç doluluk oranları ve grafiksel analizler (Chart.js).
 *   **Araç Yönetimi:** Yeni araç ekleme, resim yükleme, bakım ve sigorta takibi.
@@ -181,17 +179,8 @@ Veritabanına örnek verileri yüklediyseniz aşağıdaki bilgilerle giriş yapa
 
 ---
 
-**👑 Admin Hesabı**  
-`admin@yolingo.com / 1234`
-
----
-
-**👤 Müşteri Temsilcisi**  
-`mt@yolingo.com / 1234`
-
----
-
-**⚙️ Operasyon Sorumlusu**  
-`os@yolingo.com / 1234`
+* **👑 Admin Hesabı**  : `admin@yolingo.com / 1234`
+* **👤 Müşteri Temsilcisi**  : `mt@yolingo.com / 1234`
+* **⚙️ Operasyon Sorumlusu**  : `os@yolingo.com / 1234`
 
 
