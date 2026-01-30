@@ -9,10 +9,10 @@ Bu çalışma, **veritabanı bağlantısı ve yönetimi** konularını pekiştir
 
 **⚠️ Önemli Not:** Eğitim amaçlı geliştirildiği için bazı eksiklikler bulunabilir. Bu repoyu bir referans kaynağı olarak kullanabilir, kodları inceleyerek kendi fikirlerinizi ve çözümlerinizi projenize entegre edebilirsiniz.
 
+---
+
 ## 🌟 Özellikler
 
-
----
 
 ### 👤 Müşteri Paneli
 *   **Kolay Kiralama:** Şehir, tarih ve saat seçimi ile hızlı rezervasyon oluşturma.
@@ -177,7 +177,6 @@ Projenin bilgisayarınızda çalışması için aşağıdaki adımları izleyin:
 
 Veritabanına örnek verileri yüklediyseniz aşağıdaki bilgilerle giriş yapabilirsiniz:
 
----
 
 * **👑 Admin Hesabı**  : `admin@yolingo.com / 1234`
 * **👤 Müşteri Temsilcisi**  : `mt@yolingo.com / 1234`
