@@ -250,7 +250,7 @@ def get_calendar_events():
         FROM kiralama r
         JOIN Musteri m ON r.musteri_id = m.musteri_id
         JOIN Arac a ON r.arac_id = a.arac_id
-        WHERE r.durum IN ('Onaylandı', 'Kirada')
+        WHERE r.durum IN ('Onaylandı', 'Kirada', 'Tamamlandı')
     """
     cursor.execute(sql)
     res = cursor.fetchall()

@@ -186,7 +186,7 @@ def api_calendar_events():
             'title': baslik, 
             'start': str(e['baslangic_tarihi']), 
             'end': str(e['bitis_tarihi']), 
-            'color': '#ffc107' if e['durum']=='Onaylandı' else '#198754',
+            'color': '#ffc107' if e['durum']=='Onaylandı' else ('#198754' if e['durum']=='Kirada' else '#6c757d'),
             'extendedProps': {
                 'musteri': f"{e['ad']} {e['soyad']}",
                 'arac': f"{e['marka']} {e['model']}",
