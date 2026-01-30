@@ -11,6 +11,9 @@ Bu çalışma, **veritabanı bağlantısı ve yönetimi** konularını pekiştir
 
 ## 🌟 Özellikler
 
+
+---
+
 ### 👤 Müşteri Paneli
 *   **Kolay Kiralama:** Şehir, tarih ve saat seçimi ile hızlı rezervasyon oluşturma.
 *   **Gelişmiş Filtreleme:** Vites tipi, yakıt türü ve fiyat aralığına göre araç arama.
@@ -19,6 +22,9 @@ Bu çalışma, **veritabanı bağlantısı ve yönetimi** konularını pekiştir
 *   **PDF Sözleşme:** Kiralamalara ait resmi sözleşmeyi tek tıkla PDF olarak indirme.
 *   **Güvenli Ödeme:** Kredi kartı ile sanal ödeme simülasyonu.
 
+
+---
+
 ### 🛡️ Yönetici (Admin) Paneli
 *   **Gelişmiş Dashboard:** Anlık ciro, aktif kiralama, araç doluluk oranları ve grafiksel analizler (Chart.js).
 *   **Araç Yönetimi:** Yeni araç ekleme, resim yükleme, bakım ve sigorta takibi.
@@ -26,6 +32,9 @@ Bu çalışma, **veritabanı bağlantısı ve yönetimi** konularını pekiştir
 *   **Rezervasyon Yönetimi:** Gelen kiralamaları onaylama, iptal etme veya aracı teslim alma işlemleri.
 *   **Bakım Takibi:** Araçların servis ve bakım geçmişini kaydetme.
 *   **Yorum Yönetimi:** Müşteri yorumlarını onaylama veya reddetme.
+
+
+---
 
 ## 📸 Ekran Görüntüleri
 
@@ -42,6 +51,9 @@ Bu çalışma, **veritabanı bağlantısı ve yönetimi** konularını pekiştir
 | **Bakım Yönetimi (Alma/Çıkarma)** <br> ![17](screenshots/17.png) | **Yorum Yönetimi** <br> ![18](screenshots/18.png) |
 | **Kiralama Takvimi** <br> ![19](screenshots/19.png) | **Veritabanı Yönetimi** <br> ![20](screenshots/20.png) |
 
+
+---
+
 ## 🛠️ Teknolojiler
 
 *   **Backend:** Python 3, Flask (Blueprints yapısı ile modüler mimari)
@@ -54,6 +66,9 @@ Bu çalışma, **veritabanı bağlantısı ve yönetimi** konularını pekiştir
     *   **Flask-Mail:** E-posta bildirimleri (Gmail SMTP)
     *   **SweetAlert2:** Modern bildirim pencereleri
 
+
+
+---
 
 ## 📂 Proje Dosya Yapısı
 
@@ -107,6 +122,9 @@ flask-yolingo-car-rental/
 └── requirements.txt        # 📦 Gerekli Kütüphaneler
 ```
 
+
+---
+
 ## 🚀 Kurulum ve Çalıştırma
 
 Projenin bilgisayarınızda çalışması için aşağıdaki adımları izleyin:
@@ -154,10 +172,19 @@ Projenin bilgisayarınızda çalışması için aşağıdaki adımları izleyin:
    ```
    Tarayıcınızda `http://127.0.0.1:5000` adresine giderek projeyi görüntüleyebilirsiniz.
 
+
+---
+
 ## 🔐 Varsayılan Hesaplar
 
 Veritabanına örnek verileri yüklediyseniz aşağıdaki bilgilerle giriş yapabilirsiniz:
 
-*   **Admin Hesabı:** `admin@yolingo.com` / `1234`
-*   **Müşteri Temsilcisi:** `mt@yolingo.com` / `1234`
-*   **Operasyon Sorumlusu:** `os@yolingo.com` / `1234`
+- **👑 Admin Hesabı**  
+  `admin@yolingo.com` / `1234`  
+  ---
+- **👤 Müşteri Temsilcisi**  
+  `mt@yolingo.com` / `1234`  
+  ---
+- **⚙️ Operasyon Sorumlusu**  
+  `os@yolingo.com` / `1234`
+
