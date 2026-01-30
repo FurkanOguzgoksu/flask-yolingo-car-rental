@@ -179,12 +179,12 @@ Projenin bilgisayarınızda çalışması için aşağıdaki adımları izleyin:
 
 Veritabanına örnek verileri yüklediyseniz aşağıdaki bilgilerle giriş yapabilirsiniz:
 
-- **👑 Admin Hesabı**  
+**👑 Admin Hesabı**  
   `admin@yolingo.com` / `1234`  
   ---
-- **👤 Müşteri Temsilcisi**  
+**👤 Müşteri Temsilcisi**  
   `mt@yolingo.com` / `1234`  
   ---
-- **⚙️ Operasyon Sorumlusu**  
+**⚙️ Operasyon Sorumlusu**  
   `os@yolingo.com` / `1234`
 
