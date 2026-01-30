@@ -2,9 +2,12 @@
 
 Bu proje, Python ve Flask kullanılarak geliştirilmiş modern bir araç kiralama web uygulamasıdır. Kullanıcıların kolayca araç kiralayabileceği, yöneticilerin ise tüm süreci takip edebileceği kapsamlı bir sistem sunar.
 
-> **ℹ️ Proje Hakkında:** Bu çalışma, **veritabanı bağlantısı ve yönetimi** konularını pekiştirmek amacıyla hazırlanmış bir **Veritabanı Dersi Ödev Projesi** örneğidir.
->
-> ⚠️ **Önemli Not:** Eğitim amaçlı geliştirildiği için bazı eksiklikler bulunabilir. Bu repoyu bir referans kaynağı olarak kullanabilir, kodları inceleyerek kendi fikirlerinizi ve çözümlerinizi projenize entegre edebilirsiniz.
+
+## ℹ️ Proje Hakkında ve Önemli Notlar
+
+Bu çalışma, **veritabanı bağlantısı ve yönetimi** konularını pekiştirmek amacıyla hazırlanmış bir **Veritabanı Dersi Ödev Projesi** örneğidir.
+
+**⚠️ Önemli Not:** Eğitim amaçlı geliştirildiği için bazı eksiklikler bulunabilir. Bu repoyu bir referans kaynağı olarak kullanabilir, kodları inceleyerek kendi fikirlerinizi ve çözümlerinizi projenize entegre edebilirsiniz.
 
 ## 🌟 Özellikler
 
@@ -28,10 +31,16 @@ Bu proje, Python ve Flask kullanılarak geliştirilmiş modern bir araç kiralam
 
 | | |
 |:---:|:---:|
-| **Ana Sayfa / Giriş** <br> ![1](screenshots/1.png) | **Araç Listesi / Detay** <br> ![2](screenshots/2.png) |
-| **Kiralama / Profil** <br> ![3](screenshots/3.png) | **Ödeme / İşlem** <br> ![4](screenshots/4.png) |
-| **Admin Dashboard** <br> ![5](screenshots/5.png) | **Yönetim Paneli** <br> ![6](screenshots/6.png) |
-| **Takvim / Diğer** <br> ![7](screenshots/7.png) | |
+| **Kayıt Olma Sayfası** <br> ![1](screenshots/1.png) | **Giriş Yapma Sayfası** <br> ![2](screenshots/2.png) |
+| **Anasayfa** <br> ![3](screenshots/3.png) | **Kirada Olmayan Araçlar (Liste)** <br> ![4](screenshots/4.png) |
+| **Kiralama Sayfası** <br> ![5](screenshots/5.png) | **Ödeme Sayfası** <br> ![6](screenshots/6.png) |
+| **Müşteri Profil Sayfası** <br> ![7](screenshots/7.png) | **Şifre Değiştirme** <br> ![8](screenshots/8.png) |
+| **Favori Araçlar** <br> ![9](screenshots/9.png) | **Kiralanan Araçlar (Geçmiş)** <br> ![10](screenshots/10.png) |
+| **Sözleşme PDF Örneği** <br> ![11](screenshots/11.png) | **Yorum Yapma Formu** <br> ![12](screenshots/12.png) |
+| **Yönetici Dashboard** <br> ![13](screenshots/13.png) | **Finansal Detaylar** <br> ![14](screenshots/14.png) |
+| **Yeni Araç Ekleme** <br> ![15](screenshots/15.png) | **Sigorta Yönetimi** <br> ![16](screenshots/16.png) |
+| **Bakım Yönetimi (Alma/Çıkarma)** <br> ![17](screenshots/17.png) | **Yorum Yönetimi** <br> ![18](screenshots/18.png) |
+| **Kiralama Takvimi** <br> ![19](screenshots/19.png) | **Veritabanı Yönetimi** <br> ![20](screenshots/20.png) |
 
 ## 🛠️ Teknolojiler
 
